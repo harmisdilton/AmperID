@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ArmperID - Իմ փաստաթղթերը</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v=65">
+    <link rel="stylesheet" href="/static/css/styles.css?v=69">
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
 </head>
 
@@ -15,7 +15,9 @@
             <div class="spinner"></div>
             <p id="loader-status">Մշակվում է...</p>
         </div>
+        
         <header class="fluent-header">
+            <div class="header-top">
                 <div class="logo-container" id="logo-menu-trigger" style="cursor: pointer;">
                     <span class="logo-icon">💠</span>
                     <span class="brand-name">AmperID</span>
@@ -32,6 +34,9 @@
                     </div>
                 </div>
             </div>
+        </header>
+
+        <div class="controls-container">
             <div class="search-container">
                 <input type="text" id="search-input" placeholder="Փնտրել փաստաթուղթ...">
             </div>
@@ -50,7 +55,7 @@
                 </div>
                 <div id="nav-path" class="nav-path">Թղթապանակներ</div>
             </div>
-        </header>
+        </div>
 
         <main id="main-content">
             <!-- Documents Screen -->
@@ -59,10 +64,15 @@
             </div>
         </main>
 
-        <!-- Floating Add Button -->
-        <button id="floating-add-btn" class="fab">
-            <span>+</span>
-        </button>
+        <!-- Floating Buttons -->
+        <div class="fab-group">
+            <button id="scroll-to-top" class="fab secondary v-hidden">
+                <span>↑</span>
+            </button>
+            <button id="floating-add-btn" class="fab">
+                <span>+</span>
+            </button>
+        </div>
 
         <!-- Context Menu Modal -->
         <div id="context-menu-modal" class="modal hidden">
@@ -224,7 +234,7 @@
         </div>
     </div>
 
-    <script src="/static/js/app.js?v=65"></script>
+    <script src="/static/js/app.js?v=69"></script>
 </body>
 
 </html>

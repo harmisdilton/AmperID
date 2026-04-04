@@ -32,6 +32,7 @@ const searchInput = document.getElementById('search-input');
 const loader = document.getElementById('loader');
 const detailTitle = document.getElementById('detail-title');
 const detailFields = document.getElementById('detail-fields');
+const scrollToTopBtn = document.getElementById('scroll-to-top');
 
 // Context Menu Elements
 const ctxMoveBtn = document.getElementById('ctx-move-btn');
@@ -964,3 +965,20 @@ function startInlineRename(element, id, type) {
         }
     };
 }
+
+// --- Global Scroll Logic ---
+window.onscroll = () => {
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+        scrollToTopBtn.classList.remove('v-hidden');
+    } else {
+        scrollToTopBtn.classList.add('v-hidden');
+    }
+};
+
+scrollToTopBtn.onclick = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// Initial state
+renderDocuments();
+// updateStaticTranslations(); // Initial translation update
