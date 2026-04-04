@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="hy">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ArmperID - Իմ փաստաթղթերը</title>
+    <link rel="stylesheet" href="/static/css/styles.css?v=64">
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+</head>
+
+<body class="light-theme">
+    <div id="app">
+        <div id="loader" class="loader-container hidden">
+            <div class="spinner"></div>
+            <p id="loader-status">Մշակվում է...</p>
+        </div>
+        <header class="fluent-header">
+            <div class="header-top">
+                <div class="logo-container" id="logo-menu-trigger" style="cursor: pointer;">
+                    <span class="logo-icon">💠</span>
+                    <span class="brand-name">AmperID</span>
+                </div>
+            </div>
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Փնտրել փաստաթուղթ...">
+            </div>
+
+            <nav class="view-tabs">
+                <button id="tab-all" class="tab-btn active">Բոլոր փաստաթղթերը</button>
+                <div class="tab-divider"></div>
+                <button id="tab-folders" class="tab-btn">Թղթապանակներ</button>
+            </nav>
+
+            <!-- Folder Navigation Bar (Hidden by default) -->
+            <div id="folder-nav-bar" class="folder-nav-bar hidden">
+                <div class="nav-controls">
+                    <button id="nav-back" class="nav-btn" title="Հետ">&lt;</button>
+                    <button id="nav-forward" class="nav-btn" title="Առաջ">&gt;</button>
+                </div>
+                <div id="nav-path" class="nav-path">Թղթապանակներ</div>
+            </div>
+        </header>
+
+        <main id="main-content">
+            <!-- Documents Screen -->
+            <div id="app-screen">
+                <div id="document-list" class="doc-grid"></div>
+            </div>
+        </main>
+
+        <!-- Floating Add Button -->
+        <button id="floating-add-btn" class="fab">
+            <span>+</span>
+        </button>
+
+        <!-- Context Menu Modal -->
+        <div id="context-menu-modal" class="modal hidden">
+            <div class="modal-content bottom-sheet">
+                <div class="menu-actions">
+                    <button id="ctx-move-btn" class="primary-btn">📁 Ավելացնել թղթապանակում</button>
+                    <button id="ctx-delete-btn" class="danger-btn">🗑️ Ջնջել</button>
+                    <button id="close-ctx-menu" class="link-btn">Չեղարկել</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Move Action Bar -->
+        <div id="move-action-bar" class="move-action-bar hidden">
+            <div class="move-info">
+                <span id="move-doc-name"></span>
+            </div>
+            <div class="move-buttons">
+                <button id="finalize-move-btn" class="primary-btn small">Պահպանել այստեղ</button>
+                <button id="cancel-move-btn" class="link-btn small">Չեղարկել</button>
+            </div>
+        </div>
+
+        <!-- User Menu Modal -->
+        <div id="user-menu-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Իմ հաշիվը</h2>
+                    <button id="close-user-menu" style="background:none; border:none; font-size:1.5rem;">×</button>
+                </div>
+                <div class="menu-actions">
+                    <button id="show-profile-btn" class="primary-btn" style="margin-bottom: 1rem;">
+                        Իմ մասին (AI)
+                    </button>
+                    <button id="reset-all-data-btn" class="danger-btn">
+                        Ջնջել բոլոր տվյալները
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Modal (About Me) -->
+        <div id="profile-modal" class="modal hidden">
+            <div class="modal-content wide">
+                <div class="modal-header">
+                    <h2>Իմ մասին</h2>
+                    <button id="close-profile" style="background:none; border:none; font-size:1.5rem;">×</button>
+                </div>
+                <div id="user-profile-text" class="profile-text-container">
+                    Պրոֆիլը բեռնվում է...
+                </div>
+                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2rem;">
+                    * Այս տեքստը ստեղծվել է AI-ի կողմից՝ հիմնվելով ձեր բոլոր փաստաթղթերի վրա:
+                </p>
+                <button id="close-profile-btn" class="link-btn">Փակել</button>
+            </div>
+        </div>
+
+        <!-- Upload Modal (Document Builder) -->
+        <div id="upload-modal" class="modal hidden">
+            <div class="modal-content wide">
+                <div class="modal-header">
+                    <h2>Նոր փաստաթուղթ</h2>
+                    <button id="close-modal-top" style="background:none; border:none; font-size:1.5rem;">×</button>
+                </div>
+
+                <div id="photo-preview-grid" class="preview-grid">
+                    <!-- Thumbnails will appear here -->
+                </div>
+
+                <div class="upload-actions">
+                    <label class="camera-btn small">
+                        Նկարել
+                        <input type="file" id="add-page-camera" accept="image/*" capture="camera" hidden>
+                    </label>
+                    <label class="camera-btn small secondary">
+                        Պատկերասրահ
+                        <input type="file" id="add-page-gallery" accept="image/*" multiple hidden>
+                    </label>
+                </div>
+
+                <button id="process-batch-btn" class="primary-btn" disabled>Պահպանել փաստաթուղթը</button>
+                <button id="close-modal" class="link-btn">Չեղարկել</button>
+            </div>
+        </div>
+
+        <!-- Detail Modal -->
+        <div id="detail-modal" class="modal hidden">
+            <div class="modal-content wide">
+                <div class="modal-header">
+                    <h2 id="detail-title">Տվյալներ</h2>
+                    <button id="close-detail">×</button>
+                </div>
+                <div id="detail-fields" class="field-list"></div>
+
+                <div id="add-field-box" class="hidden">
+                    <input type="text" id="new-field-key" placeholder="Դաշտի անուն (օր. Անուն)">
+                    <input type="text" id="new-field-val" placeholder="Արժեքը">
+                    <button id="save-new-field" class="primary-btn">Պահպանել</button>
+                </div>
+
+                <button id="show-add-field" class="link-btn">+ Ավելացնել դաշտ ձեռքով</button>
+
+                <button id="copy-doc-data" class="link-btn" style="background: none; border: none; padding: 0; font-size: 0.75rem; color: var(--accent); width: auto; margin: 0.5rem 0; font-weight: 700;">
+                    Պատճենել տվյալները
+                </button>
+
+                <div id="image-preview-container" style="margin-top: 1.5rem; text-align: center;">
+                    <img id="detail-image" src="" alt="Document Scan"
+                        style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); cursor: zoom-in;"
+                        onclick="window.open(this.src)">
+                </div>
+
+                <div class="actions">
+                    <button id="save-doc-changes" class="primary-btn hidden" style="background-color: var(--success-color); margin-bottom: 1rem;">Պահպանել փոփոխությունները</button>
+                    <button id="download-pdf" class="primary-btn">Ներբեռնել PDF</button>
+                    <button id="share-pdf" class="primary-btn" style="background-color: var(--accent-color); color: white;">Ուղարկել PDF</button>
+                    <button id="delete-doc" class="danger-btn">Ջնջել</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Choice Modal - Moved out to be high-level -->
+    <div id="delete-choice-modal" class="modal hidden" style="z-index: 100000;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Ջնջելու տարբերակներ</h2>
+                <button id="close-delete-choice" style="background:none; border:none; font-size:1.5rem;">×</button>
+            </div>
+            <p style="margin: 1rem 0; color: var(--text-secondary); font-size: 0.9rem;">
+                Ինչպե՞ս եք ցանկանում վարվել այս փաստաթղթի հետ:
+            </p>
+            <div class="vertical-actions">
+                <button id="remove-from-folder-btn" class="primary-btn" style="background-color: var(--accent);">Հեռացնել միայն թղթապանակից</button>
+                <button id="delete-completely-btn" class="danger-btn">Ջնջել ամբողջությամբ</button>
+                <button id="cancel-delete-btn" class="link-btn">Չեղարկել</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Smart Suggest Modal -->
+    <div id="smart-suggest-modal" class="modal hidden" style="z-index: 100001;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>ԻԻ Առաջարկ ✨</h2>
+                <button id="close-smart-suggest" style="background:none; border:none; font-size:1.5rem;">×</button>
+            </div>
+            <p style="margin: 1rem 0; font-weight: 600; color: var(--accent);">
+                ԻԻ-ն համարում է, որ այս փաստաթղթի համար լավագույն տեղն է՝ <span id="suggested-folder-name" style="color:var(--success-color); border-bottom: 2px solid;">...</span>
+            </p>
+            <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.85rem;">
+                Ցանկանո՞ւմ եք անմիջապես տեղափոխել այնտեղ:
+            </p>
+            <div class="vertical-actions">
+                <button id="confirm-smart-move-btn" class="primary-btn">Այո, տեղափոխել</button>
+                <button id="reject-smart-move-btn" class="link-btn">Ոչ, թողնել այստեղ</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js?v=64"></script>
+</body>
+
+</html>

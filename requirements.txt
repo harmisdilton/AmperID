@@ -1,0 +1,12 @@
+python -m app.mainfastapi
+uvicorn
+python-multipart
+Pillow
+fpdf2
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt==3.2.0
+sqlalchemy
+requests
+jinja2
+google-genai
