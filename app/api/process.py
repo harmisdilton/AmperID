@@ -54,9 +54,7 @@ async def process_document(
             # If it's the first image, keep its fields as primary metadata
             if i == 0:
                 print(f"DEBUG: Professional Results (Crop + OCR): {vision_result}")
-                primary_fields = vision_result.get("տվյալներ", {})
-                primary_fields["առաջարկվող_անվանում"] = vision_result.get("առաջարկվող_անվանում", "Doc")
-                # Keep the AI suggestion
+                primary_fields = vision_result.get("translations", {})
                 primary_fields["suggested_folder"] = vision_result.get("suggested_folder")
             
             # 4. Store processed image for PDF

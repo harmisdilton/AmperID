@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ArmperID - Իմ փաստաթղթերը</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v=64">
+    <link rel="stylesheet" href="/static/css/styles.css?v=65">
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
 </head>
 
@@ -16,10 +16,20 @@
             <p id="loader-status">Մշակվում է...</p>
         </div>
         <header class="fluent-header">
-            <div class="header-top">
                 <div class="logo-container" id="logo-menu-trigger" style="cursor: pointer;">
                     <span class="logo-icon">💠</span>
                     <span class="brand-name">AmperID</span>
+                </div>
+                <!-- Language Switcher -->
+                <div class="lang-switcher">
+                    <div class="lang-selected" id="lang-menu-trigger">
+                        <span id="current-lang-flag">🇦🇲</span>
+                    </div>
+                    <div id="lang-dropdown" class="lang-dropdown hidden">
+                        <div class="lang-option" data-lang="hy">🇦🇲 Հայերեն</div>
+                        <div class="lang-option" data-lang="ru">🇷🇺 Русский</div>
+                        <div class="lang-option" data-lang="en">🇺🇸 English</div>
+                    </div>
                 </div>
             </div>
             <div class="search-container">
@@ -214,7 +224,7 @@
         </div>
     </div>
 
-    <script src="/static/js/app.js?v=64"></script>
+    <script src="/static/js/app.js?v=65"></script>
 </body>
 
 </html>

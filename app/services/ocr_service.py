@@ -44,24 +44,41 @@ class OCRService:
 
         prompt = f"""
         You are AmperID Vision Engine. Extract ALL visible data from this CROPPED document.
-        Output EVERYTHING in Armenian (Հայերեն).
+        Output everything in THREE languages: Armenian (hy), Russian (ru), and English (en).
         {folders_context}
         
         STRICT RULES:
-        1. NEVER use underscores (_) in keys. Use natural spaces (e.g., "Ծննդյան ամսաթիվ" instead of "Ծննդյան_ամսաթիվ").
+        1. NEVER use underscores (_) in keys. Use natural spaces.
         2. Pick the suggested_folder name ENTIRELY from the AVAILABLE FOLDERS list if it matches.
+        3. For 'translations', provide equivalent keys and values for each language.
         
         OUTPUT FORMAT (JSON ONLY):
         {{
-          "առաջարկվող_անվանում": "Natural Armenian Title",
-          "suggested_folder": "Pick exact match from AVAILABLE FOLDERS list, otherwise null",
-          "տվյալներ": {{
-            "Բանալի": "Արժեք"
-          }}
+          "translations": {{
+            "hy": {{
+              "title": "Փաստաթղթի անվանում",
+              "data": {{
+                "Բանալի": "Արժեք"
+              }}
+            }},
+            "ru": {{
+              "title": "Название документа",
+              "data": {{
+                "Ключ": "Значение"
+              }}
+            }},
+            "en": {{
+              "title": "Document Title",
+              "data": {{
+                "Key": "Value"
+              }}
+            }}
+          }},
+          "suggested_folder": "Pick exact match from AVAILABLE FOLDERS list, otherwise null"
         }}
         """
         
-        # Mandatory pacing to avoid 429 on subsequent pass (Increased to 7 seconds)
+        # Mandatory pacing to avoid 429 on subsequent pass (7 seconds)
         await asyncio.sleep(7)
         result = await self.call_gemini(optimized, prompt)
         return result if result else {"error": "Extraction failed"}
@@ -189,34 +206,62 @@ class OCRService:
             return image_bytes
 
     async def generate_user_profile(self, all_docs_data):
-        """Synthesizes a cohesive Armenian narrative about the person based on all document data."""
-        if not self.api_key: return "API բանալին բացակայում է:"
-        if not all_docs_data: return "Ավելացրեք փաստաթղթեր՝ պրոֆիլ ստեղծելու համար:"
+        """Synthesizes a cohesive multi-language narrative about the person based on all document data."""
+        if not self.api_key: return {"hy": "API բանալին բացակայում է:", "ru": "API ключ отсутствует:", "en": "API key is missing:"}
+        if not all_docs_data: return {"hy": "Ավելացրեք փաստաթղթեր՝ պրոֆիլ ստեղծելու համար:", "ru": "Добавьте документы, чтобы создать профиль:", "en": "Add documents to create a profile:"}
         
         data_summary = ""
         for i, doc in enumerate(all_docs_data):
-            fields = doc.get("fields_json", {})
+            # Use Armenian for context summary as a base
+            fields = doc.get("fields_json", {}).get("hy", {}).get("data", {})
             if fields:
-                data_summary += f"\nՓաստաթուղթ {i+1}: " + ", ".join([f"{k}: {v}" for k, v in fields.items()])
+                data_summary += f"\nDocument {i+1}: " + ", ".join([f"{k}: {v}" for k, v in fields.items()])
 
         if not data_summary:
-            return "Փաստաթղթերում տվյալներ չեն գտնվել:"
+            return {"hy": "Փաստաթղթերում տվյալներ չեն գտնվել:", "ru": "Данные в документах не найдены:", "en": "No data found in documents:"}
 
         prompt = f"""
-        Հիմնվելով հետևյալ փաստաթղթերի տվյալների վրա, կազմիր այս անձի հակիճ և պրոֆեսիոնալ նկարագիրը (biography) հայերենով:
-        Գրիր միայն տեքստը, առանց վերնագրերի: Մի օգտագործիր ամբողջական սերիաներ կամ կույր համարներ:
+        Based on the following document data, compose a concise and professional biography of this person.
+        Provide the response in THREE languages: Armenian (hy), Russian (ru), and English (en).
+        Format the response as a JSON object only. No titles or headers in the text.
         
-        Տվյալներ: {data_summary}
+        Data: {data_summary}
+        
+        OUTPUT FORMAT (JSON ONLY):
+        {{
+          "hy": "Biography text in Armenian",
+          "ru": "Biography text in Russian",
+          "en": "Biography text in English"
+        }}
         """
 
         try:
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=prompt
-            )
-            return response.text.strip()
+            result = await self.call_gemini_text_only(prompt)
+            return result if result else {"hy": "Սխալ:", "ru": "Ошибка:", "en": "Error:"}
         except Exception as e:
             print(f"DEBUG: Profile generation failed: {e}")
-            return "Պրոֆիլի թարմացումը ձախողվեց:"
+            return {"hy": "Պրոֆիլի թարմացումը ձախողվեց:", "ru": "Не удалось обновить профиль:", "en": "Failed to update profile:"}
+
+    async def call_gemini_text_only(self, prompt, retries=5):
+        """Helper to call Gemini for text results that should be JSON parsed."""
+        for attempt in range(retries):
+            try:
+                response = self.client.models.generate_content(
+                    model=self.model,
+                    contents=prompt
+                )
+                ai_text = response.text.strip()
+                if "```json" in ai_text:
+                    ai_text = ai_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in ai_text:
+                    ai_text = ai_text.split("```")[1].split("```")[0].strip()
+                return json.loads(ai_text)
+            except Exception as e:
+                wait_time = (attempt + 1) * 7
+                if attempt < retries - 1:
+                    await asyncio.sleep(wait_time)
+                else:
+                    return None
+        return None
 
 ocr_service = OCRService()

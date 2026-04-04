@@ -54,9 +54,295 @@ let movingDocId = null; // ID of doc being moved
 let folderBackStack = [];
 let folderForwardStack = [];
 
+// --- Translation ---
+const translations = {
+    hy: {
+        search_placeholder: "Փնտրել փաստաթուղթ...",
+        tab_all: "Բոլոր փաստաթղթերը",
+        tab_folders: "Թղթապանակներ",
+        nav_path_root: "Թղթապանակներ",
+        ctx_move: "📁 Ավելացնել թղթապանակում",
+        ctx_delete: "🗑️ Ջնջել",
+        ctx_cancel: "Չեղարկել",
+        move_save: "Պահպանել այստեղ",
+        move_cancel: "Չեղարկել",
+        account_title: "Իմ հաշիվը",
+        show_profile: "Իմ մասին (AI)",
+        reset_data: "Ջնջել բոլոր տվյալները",
+        about_me_title: "Իմ մասին",
+        about_me_loading: "Պրոֆիլը բեռնվում է...",
+        about_me_generating: "Պրոֆիլը գեներացվում է... (սպասեք 5-10 վրկ)",
+        about_me_empty: "Ավելացրեք փաստաթղթեր՝ ձեր պրոֆիլը ստեղծելու համար:",
+        about_me_disclaimer: "* Այս տեքստը ստեղծվել է AI-ի կողմից՝ հիմնվելով ձեր բոլոր փաստաթղթերի վրա:",
+        close: "Փակել",
+        new_doc_title: "Նոր փաստաթուղթ",
+        capture_btn: "Նկարել",
+        gallery_btn: "Պատկերասրահ",
+        save_doc: "Պահպանել փաստաթուղթը",
+        cancel: "Չեղարկել",
+        detail_data: "Տվյալներ",
+        add_field_btn: "+ Ավելացնել դաշտ ձեռքով",
+        copy_data: "Պատճենել տվյալները",
+        save_changes: "Պահպանել փոփոխությունները",
+        download_pdf: "Ներբեռնել PDF",
+        share_pdf: "Ուղարկել PDF",
+        delete: "Ջնջել",
+        delete_options: "Ջնջելու տարբերակներ",
+        delete_description: "Ինչպե՞ս եք ցանկանում վարվել այս փաստաթղթի հետ?",
+        rm_from_folder: "Հեռացնել միայն թղթապանակից",
+        delete_completely: "Ջնջել ամբողջությամբ",
+        ai_suggest: "ԻԻ Առաջարկ ✨",
+        ai_suggest_desc: "ԻԻ-ն համարում է, որ այս փաստաթղթի համար լավագույն տեղն է՝",
+        ai_suggest_confirm: "Ցանկանո՞ւմ եք անմիջապես տեղափոխել այնտեղ?",
+        yes_move: "Այո, տեղափոխել",
+        no_stay: "Ոչ, թողնել այստեղ",
+        processing_pages: "Ուղարկում է {n} էջ...",
+        ai_processing: "ԻԻ-ն սկանավորում և կտրում է... (սպասեք 10-20 վրկ)",
+        saving_db: "Պահպանում է բազայում...",
+        confirm_reset: "Զգուշացում: Այս գործողությունը կջնջի ԲՈԼՈՐ փաստաթղթերը և թղթապանակները: Շարունակե՞լ:",
+        confirm_delete_doc: "Ջնջե՞լ \"{t}\" փաստաթուղթը:",
+        confirm_delete_folder: "Ջնջե՞լ \"{t}\" թղթապանակը:",
+        new_folder_placeholder: "Նոր թղթապանակ",
+        empty_view: "Թղթապանակներ դեռ չկան",
+        empty_folder: "Թղթապանակը դատարկ է",
+        saved_msg: "Պահպանված է",
+        error_ai: "Սխալ՝ ԻԻ մշակման ընթացքում:",
+        error_conn: "Սխալ՝ կապի ընթացքում:",
+        no_name: "Անուն չկա",
+        doc_default_name: "Նոր փաստաթուղթ",
+        loader_default: "Մշակվում է...",
+        field_name_label: "Դաշտի անուն (օր. Անուն)",
+        field_val_label: "Արժեքը",
+        moved_msg: "Փաստաթուղթը տեղափոխված է:",
+        move_info_prefix: "Տեղափոխել: ",
+        flag: "🇦🇲"
+    },
+    ru: {
+        search_placeholder: "Поиск документов...",
+        tab_all: "Все документы",
+        tab_folders: "Папки",
+        nav_path_root: "Папки",
+        ctx_move: "📁 Добавить в папку",
+        ctx_delete: "🗑️ Удалить",
+        ctx_cancel: "Отмена",
+        move_save: "Сохранить здесь",
+        move_cancel: "Отмена",
+        account_title: "Мой аккаунт",
+        show_profile: "Обо мне (AI)",
+        reset_data: "Удалить все данные",
+        about_me_title: "Обо мне",
+        about_me_loading: "Профиль загружается...",
+        about_me_generating: "Профиль создается... (жди 5-10 сек)",
+        about_me_empty: "Добавьте документы, чтобы создать профиль.",
+        about_me_disclaimer: "* Этот текст создан ИИ на основе ваших документов.",
+        close: "Закрыть",
+        new_doc_title: "Новый документ",
+        capture_btn: "Снять",
+        gallery_btn: "Галерея",
+        save_doc: "Сохранить документ",
+        cancel: "Отмена",
+        detail_data: "Данные",
+        add_field_btn: "+ Добавить поле вручную",
+        copy_data: "Копировать данные",
+        save_changes: "Сохранить изменения",
+        download_pdf: "Скачать PDF",
+        share_pdf: "Отправить PDF",
+        delete: "Удалить",
+        delete_options: "Варианты удаления",
+        delete_description: "Как вы хотите поступить с этим документом?",
+        rm_from_folder: "Удалить только из папки",
+        delete_completely: "Удалить полностью",
+        ai_suggest: "Предложение ИИ ✨",
+        ai_suggest_desc: "ИИ считает, что лучшее место для этого документа:",
+        ai_suggest_confirm: "Хотите переместить его туда?",
+        yes_move: "Да, переместить",
+        no_stay: "Нет, оставить здесь",
+        processing_pages: "Отправка {n} стр...",
+        ai_processing: "ИИ сканирует... (жди 10-20 сек)",
+        saving_db: "Сохранение в базу...",
+        confirm_reset: "Предупреждение: Это удалит ВСЕ документы и папки. Продолжить?",
+        confirm_delete_doc: "Удалить документ \"{t}\"?",
+        confirm_delete_folder: "Удалить папку \"{t}\"?",
+        new_folder_placeholder: "Новая папка",
+        empty_view: "Папок пока нет",
+        empty_folder: "Папка пуста",
+        saved_msg: "Сохранено",
+        error_ai: "Ошибка при обработке ИИ:",
+        error_conn: "Ошибка связи:",
+        no_name: "Без имени",
+        doc_default_name: "Новый документ",
+        loader_default: "Обработка...",
+        field_name_label: "Имя поля (напр. Имя)",
+        field_val_label: "Значение",
+        moved_msg: "Документ перемещен.",
+        move_info_prefix: "Переместить: ",
+        flag: "🇷🇺"
+    },
+    en: {
+        search_placeholder: "Search documents...",
+        tab_all: "All Documents",
+        tab_folders: "Folders",
+        nav_path_root: "Folders",
+        ctx_move: "📁 Add to folder",
+        ctx_delete: "🗑️ Delete",
+        ctx_cancel: "Cancel",
+        move_save: "Save here",
+        move_cancel: "Cancel",
+        account_title: "My Account",
+        show_profile: "About Me (AI)",
+        reset_data: "Reset Alt Data",
+        about_me_title: "About Me",
+        about_me_loading: "Loading profile...",
+        about_me_generating: "Generating profile... (wait 5-10s)",
+        about_me_empty: "Add documents to generate your profile.",
+        about_me_disclaimer: "* This text is generated by AI based on your documents.",
+        close: "Close",
+        new_doc_title: "New Document",
+        capture_btn: "Capture",
+        gallery_btn: "Gallery",
+        save_doc: "Save Document",
+        cancel: "Cancel",
+        detail_data: "Data Fields",
+        add_field_btn: "+ Add field manually",
+        copy_data: "Copy Data",
+        save_changes: "Save Changes",
+        download_pdf: "Download PDF",
+        share_pdf: "Send PDF",
+        delete: "Delete",
+        delete_options: "Delete Options",
+        delete_description: "How would you like to handle this document?",
+        rm_from_folder: "Remove from folder only",
+        delete_completely: "Delete completely",
+        ai_suggest: "AI Suggestion ✨",
+        ai_suggest_desc: "AI thinks the best place for this is:",
+        ai_suggest_confirm: "Would you like to move it there now?",
+        yes_move: "Yes, move it",
+        no_stay: "No, keep it here",
+        processing_pages: "Uploading {n} pages...",
+        ai_processing: "AI scanning... (wait 10-20s)",
+        saving_db: "Saving to database...",
+        confirm_reset: "Warning: This will delete ALL documents and folders. Continue?",
+        confirm_delete_doc: "Delete document \"{t}\"?",
+        confirm_delete_folder: "Delete folder \"{t}\"?",
+        new_folder_placeholder: "New Folder",
+        empty_view: "No folders yet",
+        empty_folder: "Folder is empty",
+        saved_msg: "Saved",
+        error_ai: "AI Processing Error:",
+        error_conn: "Connection error:",
+        no_name: "No Name",
+        doc_default_name: "New Document",
+        loader_default: "Processing...",
+        field_name_label: "Field name (e.g. Name)",
+        field_val_label: "Value",
+        moved_msg: "Document moved.",
+        move_info_prefix: "Move: ",
+        flag: "🇺🇸"
+    }
+};
+
+let currentLang = localStorage.getItem('amp_lang') || 'hy';
+
+function t(key, params = {}) {
+    let str = translations[currentLang][key] || key;
+    for (const [k, v] of Object.entries(params)) {
+        str = str.replace(`{${k}}`, v);
+    }
+    return str;
+}
+
+function initLangSwitcher() {
+    const trigger = document.getElementById('lang-menu-trigger');
+    const dropdown = document.getElementById('lang-dropdown');
+    const flagEl = document.getElementById('current-lang-flag');
+
+    trigger.onclick = (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('hidden');
+    };
+
+    document.querySelectorAll('.lang-option').forEach(opt => {
+        opt.onclick = () => {
+            const lang = opt.dataset.lang;
+            setLanguage(lang);
+            dropdown.classList.add('hidden');
+        };
+    });
+
+    document.addEventListener('click', () => dropdown.classList.add('hidden'));
+    
+    // Initial flag
+    flagEl.innerText = translations[currentLang].flag;
+}
+
+function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('amp_lang', lang);
+    document.getElementById('current-lang-flag').innerText = translations[lang].flag;
+    updateStaticTranslations();
+    renderDocuments();
+}
+
+function updateStaticTranslations() {
+    // Basic elements
+    document.getElementById('search-input').placeholder = t('search_placeholder');
+    document.getElementById('tab-all').innerText = t('tab_all');
+    document.getElementById('tab-folders').innerText = t('tab_folders');
+    document.getElementById('loader-status').innerText = t('loader_default');
+    
+    // Modals
+    document.querySelector('#user-menu-modal h2').innerText = t('account_title');
+    document.getElementById('show-profile-btn').innerText = t('show_profile');
+    document.getElementById('reset-all-data-btn').innerText = t('reset_data');
+    
+    document.querySelector('#profile-modal h2').innerText = t('about_me_title');
+    document.querySelector('#profile-modal p').innerText = t('about_me_disclaimer');
+    document.getElementById('close-profile-btn').innerText = t('close');
+    
+    document.querySelector('#upload-modal h2').innerText = t('new_doc_title');
+    document.querySelector('.camera-btn:not(.secondary)').firstChild.textContent = t('capture_btn') + " ";
+    document.querySelector('.camera-btn.secondary').firstChild.textContent = t('gallery_btn') + " ";
+    document.getElementById('process-batch-btn').innerText = t('save_doc');
+    document.getElementById('close-modal').innerText = t('cancel');
+    
+    document.getElementById('show-add-field').innerText = t('add_field_btn');
+    document.getElementById('copy-doc-data').innerText = t('copy_data');
+    document.getElementById('save-doc-changes').innerText = t('save_changes');
+    document.getElementById('download-pdf').innerText = t('download_pdf');
+    document.getElementById('share-pdf').innerText = t('share_pdf');
+    document.getElementById('delete-doc').innerText = t('delete');
+    
+    document.querySelector('#delete-choice-modal h2').innerText = t('delete_options');
+    document.querySelector('#delete-choice-modal p').innerText = t('delete_description');
+    document.getElementById('remove-from-folder-btn').innerText = t('rm_from_folder');
+    document.getElementById('delete-completely-btn').innerText = t('delete_completely');
+    document.getElementById('cancel-delete-btn').innerText = t('cancel');
+    
+    document.querySelector('#smart-suggest-modal h2').innerText = t('ai_suggest');
+    document.querySelector('#smart-suggest-modal p:nth-of-type(1)').firstChild.textContent = t('ai_suggest_desc') + " ";
+    document.querySelector('#smart-suggest-modal p:nth-of-type(2)').innerText = t('ai_suggest_confirm');
+    document.getElementById('confirm-smart-move-btn').innerText = t('yes_move');
+    document.getElementById('reject-smart-move-btn').innerText = t('no_stay');
+    
+    // Context Menu
+    document.getElementById('ctx-move-btn').innerText = t('ctx_move');
+    document.getElementById('ctx-delete-btn').innerText = t('ctx_delete');
+    document.getElementById('close-ctx-menu').innerText = t('ctx_cancel');
+
+    // Move Bar
+    document.getElementById('finalize-move-btn').innerText = t('move_save');
+    document.getElementById('cancel-move-btn').innerText = t('move_cancel');
+    
+    // Detail Modal Placeholders
+    document.getElementById('new-field-key').placeholder = t('field_name_label');
+    document.getElementById('new-field-val').placeholder = t('field_val_label');
+}
+
 // --- Initialization ---
 
 window.onload = () => {
+    initLangSwitcher();
+    updateStaticTranslations();
     initTabs();
     initFolderNav();
     initContextUI();
@@ -80,7 +366,7 @@ function initContextUI() {
             await db.documents.update(movingDocId, { folder_id: currentFolderId });
             movingDocId = null;
             moveActionBar.classList.add('hidden');
-            alert("Փաստաթուղթը տեղափոխված է:");
+            alert(t('moved_msg'));
             renderDocuments();
         }
     };
@@ -126,27 +412,26 @@ document.getElementById('close-user-menu').onclick = () => userMenuModal.classLi
 document.getElementById('show-profile-btn').onclick = async () => {
     userMenuModal.classList.add('hidden');
     profileModal.classList.remove('hidden');
-    const profileTextEl = document.getElementById('user-profile-text');
-    
     // Check if we have documents to generate FROM
     const allDocs = await db.documents.toArray();
     if (allDocs.length === 0) {
-        profileTextEl.innerText = "Ավելացրեք փաստաթղթեր՝ ձեր պրոֆիլը ստեղծելու համար:";
+        profileTextEl.innerText = t('about_me_empty');
         return;
     }
 
     try {
-        profileTextEl.innerText = "Պրոֆիլը գեներացվում է... (սպասեք 5-10 վրկ)";
+        profileTextEl.innerText = t('about_me_generating');
         const res = await fetch('/api/process/generate-profile', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(allDocs)
         });
         const data = await res.json();
-        profileTextEl.innerText = data.profile || "Պրոֆիլի թարմացումը ձախողվեց:";
+        const profileData = data.profile || {};
+        profileTextEl.innerText = profileData[currentLang] || profileData['hy'] || t('error_conn');
     } catch (e) {
         console.error("Profile Error:", e);
-        profileTextEl.innerText = "Սխալ՝ կապի ընթացքում:";
+        profileTextEl.innerText = t('error_conn');
     }
 };
 
@@ -154,7 +439,7 @@ document.getElementById('close-profile').onclick = () => profileModal.classList.
 document.getElementById('close-profile-btn').onclick = () => profileModal.classList.add('hidden');
 
 document.getElementById('reset-all-data-btn').onclick = async () => {
-    if (confirm("Զգուշացում: Այս գործողությունը կջնջի ԲՈԼՈՐ փաստաթղթերը և թղթապանակները: Շարունակե՞լ:")) {
+    if (confirm(t('confirm_reset'))) {
         await db.delete();
         window.location.reload();
     }
@@ -211,18 +496,18 @@ function showDocContextMenu(doc) {
             };
 
             document.getElementById('delete-completely-btn').onclick = async () => {
-                if (confirm("Ջնջե՞լ ամբողջությամբ:")) {
+                if (confirm(t('confirm_delete_doc', {t: doc.title}))) {
                     await db.documents.delete(doc.id);
                     choiceModal.classList.add('hidden');
                     renderDocuments();
                 }
             };
-
+            
             document.getElementById('close-delete-choice').onclick = () => choiceModal.classList.add('hidden');
             document.getElementById('cancel-delete-btn').onclick = () => choiceModal.classList.add('hidden');
         } else {
             // Normal root deletion
-            if (confirm(`Ջնջե՞լ "${doc.title}" փաստաթուղթը:`)) {
+            if (confirm(t('confirm_delete_doc', {t: doc.title}))) {
                 await db.documents.delete(doc.id);
                 renderDocuments();
             }
@@ -231,7 +516,7 @@ function showDocContextMenu(doc) {
 
     ctxMoveBtn.onclick = () => {
         movingDocId = doc.id;
-        moveDocName.innerText = `Տեղափոխել: ${doc.title}`;
+        moveDocName.innerText = t('move_info_prefix') + doc.title;
         ctxMenuModal.classList.add('hidden');
         moveActionBar.classList.remove('hidden');
         // Switch to folders tab automatically
@@ -292,13 +577,13 @@ async function renderDocuments() {
             console.log("Root Folders Found:", folders.length);
             
             if (folders.length === 0 && !movingDocId) {
-                docList.innerHTML = `<p style="text-align:center; grid-column:1/-1; color:gray; margin-top:2rem;">Թղթապանակներ դեռ չկան</p>`;
+                docList.innerHTML = `<p style="text-align:center; grid-column:1/-1; color:gray; margin-top:2rem;">${t('empty_view')}</p>`;
             }
             folders.forEach(f => renderFolderCard(f));
         } else {
             const folder = await db.folders.get(currentFolderId);
             navBar.classList.remove('hidden');
-            document.getElementById('nav-path').innerText = `Թղթապանակներ > ${folder.name}`;
+            document.getElementById('nav-path').innerText = `${t('nav_path_root')} > ${folder.name}`;
             
             // Subfolders: Filter where parent_id is currentFolderId
             const foldersRaw = await db.folders.toArray();
@@ -313,7 +598,7 @@ async function renderDocuments() {
             docsInFolder.forEach(d => renderDocCard(d));
 
             if (subfolders.length === 0 && docsInFolder.length === 0) {
-                docList.innerHTML += `<p style="text-align:center; grid-column:1/-1; color:gray; margin-top:2rem;">Թղթապանակը դատարկ է</p>`;
+                docList.innerHTML += `<p style="text-align:center; grid-column:1/-1; color:gray; margin-top:2rem;">${t('empty_folder')}</p>`;
             }
         }
     } else {
@@ -336,7 +621,7 @@ function renderFolderCard(folder) {
         const input = card.querySelector('input');
         setTimeout(() => { input.focus(); input.select(); }, 50);
         const save = async () => {
-            const val = input.value.trim() || "Անուն չկա";
+            const val = input.value.trim() || t('no_name');
             await db.folders.update(folder.id, { name: val });
             newlyCreatedFolderId = null;
             renderDocuments();
@@ -357,7 +642,7 @@ function renderFolderCard(folder) {
         };
 
         addLongPressListener(card, async () => {
-            if (confirm(`Ջնջե՞լ "${folder.name}" թղթապանակը:`)) {
+            if (confirm(t('confirm_delete_folder', {t: folder.name}))) {
                 await db.folders.delete(folder.id);
                 renderDocuments();
             }
@@ -370,7 +655,8 @@ function renderDocCard(doc) {
     const div = document.createElement('div');
     div.className = 'doc-card';
     const thumb = doc.thumbnail_data ? `<img src="${doc.thumbnail_data}" class="doc-thumbnail">` : `<div class="doc-thumbnail" style="display:flex;align-items:center;justify-content:center;font-size:2rem;">📄</div>`;
-    div.innerHTML = `${thumb}<h3>${doc.title}</h3><p style="font-size:0.7rem; color:gray;">${new Date(doc.created_at).toLocaleDateString()}</p>`;
+    const dateLocale = currentLang === 'hy' ? 'hy-AM' : currentLang === 'ru' ? 'ru-RU' : 'en-US';
+    div.innerHTML = `${thumb}<h3>${doc.title}</h3><p style="font-size:0.7rem; color:gray;">${new Date(doc.created_at).toLocaleDateString(dateLocale)}</p>`;
     
     div.onclick = () => { if (!div.classList.contains('long-pressing')) openDetail(doc.id); };
     
@@ -389,20 +675,53 @@ function renderDocCard(doc) {
 async function openDetail(id) {
     const doc = await db.documents.get(id);
     if (!doc) return;
-    detailTitle.innerHTML = `<input type="text" id="edit-doc-title" value="${doc.title}" class="title-input">`;
+    
+    const fieldsRaw = doc.fields_json || {};
+    let fields = {};
+    let displayTitle = doc.title;
+
+    // Logic to select fields based on current language or fallback
+    if (fieldsRaw[currentLang]) {
+        fields = fieldsRaw[currentLang].data;
+        displayTitle = fieldsRaw[currentLang].title || doc.title;
+    } else if (fieldsRaw.տվյալներ) {
+        // Fallback for old Armenian-only format
+        fields = fieldsRaw.տվյալներ;
+    } else {
+        // Fallback for unexpected or flat formats
+        fields = fieldsRaw;
+    }
+
+    detailTitle.innerHTML = `<input type="text" id="edit-doc-title" value="${displayTitle}" class="title-input">`;
     detailFields.innerHTML = '';
-    const fields = doc.fields_json || {};
+
     for (const [k, v] of Object.entries(fields)) {
-        if (k === 'առաջարկվող_անվանում') continue;
+        if (k === 'առաջարկվող_անվանում' || k === 'suggested_folder') continue;
         detailFields.innerHTML += `<div class="field-row"><span class="field-label">${k}</span><input type="text" class="edit-field-val" data-key="${k}" value="${v}" style="width:100%; border:none; font-weight:600;"></div>`;
     }
     document.getElementById('save-doc-changes').onclick = async () => {
         const updates = { title: document.getElementById('edit-doc-title').value.trim() };
-        const newFields = {};
-        document.querySelectorAll('.edit-field-val').forEach(i => newFields[i.dataset.key] = i.value.trim());
+        const newFields = doc.fields_json || {};
+        
+        // Handle both formats: old (flat) and new (translations map)
+        if (newFields[currentLang]) {
+            document.querySelectorAll('.edit-field-val').forEach(i => {
+                newFields[currentLang].data[i.dataset.key] = i.value.trim();
+            });
+        } else if (newFields.տվյալներ) {
+            document.querySelectorAll('.edit-field-val').forEach(i => {
+                newFields.տվյալներ[i.dataset.key] = i.value.trim();
+            });
+        } else {
+            // Fallback for simple flat objects if any
+             document.querySelectorAll('.edit-field-val').forEach(i => {
+                newFields[i.dataset.key] = i.value.trim();
+            });
+        }
+
         updates.fields_json = newFields;
         await db.documents.update(id, updates);
-        alert("Պահպանված է");
+        alert(t('saved_msg'));
         renderDocuments();
     };
     document.getElementById('download-pdf').onclick = () => { 
@@ -424,7 +743,7 @@ async function openDetail(id) {
             };
 
             document.getElementById('delete-completely-btn').onclick = async () => {
-                if (confirm("Ջնջե՞լ ամբողջությամբ:")) {
+                if (confirm(t('confirm_delete_doc', {t: doc.title}))) {
                     await db.documents.delete(id);
                     choiceModal.classList.add('hidden');
                     detailModal.classList.add('hidden');
@@ -437,7 +756,7 @@ async function openDetail(id) {
             
         } else {
             // Standard root deletion
-            if (confirm("Ջնջե՞լ:")) { 
+            if (confirm(t('confirm_delete_doc', {t: doc.title}))) { 
                 await db.documents.delete(id); 
                 detailModal.classList.add('hidden'); 
                 renderDocuments(); 
@@ -450,7 +769,7 @@ async function openDetail(id) {
 
 floatingAddBtn.onclick = async () => {
     if (currentView === "folders") {
-        const id = await db.folders.add({ name: "Նոր թղթապանակ", parent_id: currentFolderId, created_at: new Date().toISOString() });
+        const id = await db.folders.add({ name: t('new_folder_placeholder'), parent_id: currentFolderId, created_at: new Date().toISOString() });
         newlyCreatedFolderId = id;
         renderDocuments();
     } else {
@@ -474,7 +793,7 @@ function handlePreview(files) {
         reader.onload = (ev) => {
             const div = document.createElement('div');
             div.className = 'preview-item';
-            div.innerHTML = `<img src="${ev.target.result}"><button class="remove-p">Ջնջել</button>`;
+            div.innerHTML = `<img src="${ev.target.result}"><button class="remove-p">${t('delete')}</button>`;
             div.querySelector('.remove-p').onclick = () => {
                 selectedFiles = selectedFiles.filter(f => f !== file);
                 div.remove();
@@ -490,7 +809,7 @@ function handlePreview(files) {
 document.getElementById('process-batch-btn').onclick = async () => {
     if (selectedFiles.length === 0) return;
     const statusText = document.getElementById('loader-status');
-    if (statusText) statusText.innerText = `Ուղարկում է ${selectedFiles.length} էջ...`;
+    if (statusText) statusText.innerText = t('processing_pages', {n: selectedFiles.length});
     loader.classList.remove('hidden');
     uploadModal.classList.add('hidden');
 
@@ -505,7 +824,7 @@ document.getElementById('process-batch-btn').onclick = async () => {
     if (folderNames) fd.append('folder_names', folderNames);
 
     try {
-        if (statusText) statusText.innerText = "ԻԻ-ն սկանավորում և կտրում է... (սպասեք 10-20 վրկ)";
+        if (statusText) statusText.innerText = t('ai_processing');
         const res = await fetch('/api/process/process-doc', { 
             method: 'POST', 
             body: fd 
@@ -516,7 +835,7 @@ document.getElementById('process-batch-btn').onclick = async () => {
         const result = await res.json();
         
         if (result.status === 'success') {
-            if (statusText) statusText.innerText = "Պահպանում է բազայում...";
+            if (statusText) statusText.innerText = t('saving_db');
             
             const suggestedFolderName = result.extracted_fields.suggested_folder;
             let targetFolderId = currentFolderId;
@@ -555,7 +874,7 @@ document.getElementById('process-batch-btn').onclick = async () => {
             }
 
             await db.documents.add({
-                title: result.extracted_fields.առաջարկվող_անվանում || "Նոր փաստաթուղթ",
+                title: result.extracted_fields[currentLang]?.title || result.extracted_fields['hy']?.title || t('doc_default_name'),
                 pdf_data: `data:application/pdf;base64,${result.pdf_base64}`,
                 thumbnail_data: `data:image/jpeg;base64,${result.thumbnail_base64}`,
                 fields_json: result.extracted_fields,
@@ -566,7 +885,7 @@ document.getElementById('process-batch-btn').onclick = async () => {
         }
     } catch (e) {
         console.error("Batch OCR Error:", e);
-        alert("Սխալ՝ ԻԻ մշակման ընթացքում:");
+        alert(t('error_ai'));
     } finally {
         // Clear state and UI
         selectedFiles = [];
