@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ArmperID - Իմ փաստաթղթերը</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v=70">
+    <link rel="stylesheet" href="/static/css/styles.css?v=72">
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
 </head>
 
@@ -15,7 +15,7 @@
             <div class="spinner"></div>
             <p id="loader-status">Մշակվում է...</p>
         </div>
-        
+
         <header class="fluent-header">
             <div class="header-top">
                 <div class="logo-container" id="logo-menu-trigger" style="cursor: pointer;">
@@ -176,7 +176,8 @@
 
                 <button id="show-add-field" class="link-btn">+ Ավելացնել դաշտ ձեռքով</button>
 
-                <button id="copy-doc-data" class="link-btn" style="background: none; border: none; padding: 0; font-size: 0.75rem; color: var(--accent); width: auto; margin: 0.5rem 0; font-weight: 700;">
+                <button id="copy-doc-data" class="link-btn"
+                    style="background: none; border: none; padding: 0; font-size: 0.75rem; color: var(--accent); width: auto; margin: 0.5rem 0; font-weight: 700;">
                     Պատճենել տվյալները
                 </button>
 
@@ -187,9 +188,12 @@
                 </div>
 
                 <div class="actions">
-                    <button id="save-doc-changes" class="primary-btn hidden" style="background-color: var(--success-color); margin-bottom: 1rem;">Պահպանել փոփոխությունները</button>
+                    <button id="save-doc-changes" class="primary-btn hidden"
+                        style="background-color: var(--success-color); margin-bottom: 1rem;">Պահպանել
+                        փոփոխությունները</button>
                     <button id="download-pdf" class="primary-btn">Ներբեռնել PDF</button>
-                    <button id="share-pdf" class="primary-btn" style="background-color: var(--accent-color); color: white;">Ուղարկել PDF</button>
+                    <button id="share-pdf" class="primary-btn"
+                        style="background-color: var(--accent-color); color: white;">Ուղարկել PDF</button>
                     <button id="delete-doc" class="danger-btn">Ջնջել</button>
                 </div>
             </div>
@@ -207,7 +211,8 @@
                 Ինչպե՞ս եք ցանկանում վարվել այս փաստաթղթի հետ:
             </p>
             <div class="vertical-actions">
-                <button id="remove-from-folder-btn" class="primary-btn" style="background-color: var(--accent);">Հեռացնել միայն թղթապանակից</button>
+                <button id="remove-from-folder-btn" class="primary-btn"
+                    style="background-color: var(--accent);">Հեռացնել միայն թղթապանակից</button>
                 <button id="delete-completely-btn" class="danger-btn">Ջնջել ամբողջությամբ</button>
                 <button id="cancel-delete-btn" class="link-btn">Չեղարկել</button>
             </div>
@@ -222,7 +227,8 @@
                 <button id="close-smart-suggest" style="background:none; border:none; font-size:1.5rem;">×</button>
             </div>
             <p style="margin: 1rem 0; font-weight: 600; color: var(--accent);">
-                ԻԻ-ն համարում է, որ այս փաստաթղթի համար լավագույն տեղն է՝ <span id="suggested-folder-name" style="color:var(--success-color); border-bottom: 2px solid;">...</span>
+                ԻԻ-ն համարում է, որ այս փաստաթղթի համար լավագույն տեղն է՝ <span id="suggested-folder-name"
+                    style="color:var(--success-color); border-bottom: 2px solid;">...</span>
             </p>
             <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.85rem;">
                 Ցանկանո՞ւմ եք անմիջապես տեղափոխել այնտեղ:

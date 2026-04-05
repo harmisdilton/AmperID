@@ -93,7 +93,8 @@ class OCRService:
         """Helper to call Gemini with exponential backoff and better error parsing."""
         for attempt in range(retries):
             try:
-                response = self.client.models.generate_content(
+                # Use Async Client (aio) to avoid blocking the event loop
+                response = await self.client.aio.models.generate_content(
                     model=self.model,
                     contents=[
                         prompt,
@@ -217,8 +218,17 @@ class OCRService:
         
         data_summary = ""
         for i, doc in enumerate(all_docs_data):
-            # Use Armenian for context summary as a base
-            fields = doc.get("fields_json", {}).get("hy", {}).get("data", {})
+            # Better extraction: check most likely paths for translations
+            fields_json = doc.get("fields_json", {})
+            # Try Armenian, then English, then Russian
+            lang_data = fields_json.get("hy") or fields_json.get("en") or fields_json.get("ru")
+            
+            fields = {}
+            if lang_data and isinstance(lang_data, dict):
+                fields = lang_data.get("data", {})
+            elif isinstance(fields_json, dict) and "data" in fields_json:
+                fields = fields_json.get("data", {})
+                
             if fields:
                 data_summary += f"\nDocument {i+1}: " + ", ".join([f"{k}: {v}" for k, v in fields.items()])
 
@@ -247,11 +257,12 @@ class OCRService:
             print(f"DEBUG: Profile generation failed: {e}")
             return {"hy": "Պրոֆիլի թարմացումը ձախողվեց:", "ru": "Не удалось обновить профиль:", "en": "Failed to update profile:"}
 
-    async def call_gemini_text_only(self, prompt, retries=5):
+    async def call_gemini_text_only(self, prompt, retries=3):
         """Helper to call Gemini for text results that should be JSON parsed."""
         for attempt in range(retries):
             try:
-                response = self.client.models.generate_content(
+                # Use Async Client (aio) to avoid blocking the event loop
+                response = await self.client.aio.models.generate_content(
                     model=self.model,
                     contents=prompt
                 )
@@ -262,7 +273,8 @@ class OCRService:
                     ai_text = ai_text.split("```")[1].split("```")[0].strip()
                 return json.loads(ai_text)
             except Exception as e:
-                wait_time = (attempt + 1) * 7
+                print(f"DEBUG: Gemini Text call failed (Attempt {attempt+1}/{retries}): {e}")
+                wait_time = (attempt + 1) * 3
                 if attempt < retries - 1:
                     await asyncio.sleep(wait_time)
                 else:
