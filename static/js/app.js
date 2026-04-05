@@ -610,87 +610,99 @@ function addLongPressListener(element, callback) {
 
 // --- Rendering ---
 
+let renderTimer;
+let isRendering = false;
+
 async function renderDocuments() {
-    if (!docList) return;
-    docList.innerHTML = '';
-    const navBar = document.getElementById('folder-nav-bar');
-    console.log("Rendering View:", currentView, "at Folder:", currentFolderId);
+    // Debounce: Cancel any pending render and start a new one to prevent duplication
+    clearTimeout(renderTimer);
+    renderTimer = setTimeout(async () => {
+        if (isRendering || !docList) return;
+        isRendering = true;
+        try {
+            docList.innerHTML = '';
+            const navBar = document.getElementById('folder-nav-bar');
+            console.log("Rendering View:", currentView, "at Folder:", currentFolderId);
+            
+            // Hide FAB during Move Mode to clean up the UI
+            floatingAddBtn.classList.toggle('hidden', !!movingDocId);
     
-    // Hide FAB during Move Mode to clean up the UI
-    floatingAddBtn.classList.toggle('hidden', !!movingDocId);
-
-    if (currentView === "folders") {
-        const foldersRaw = await db.folders.toArray();
-        console.log("Total Folders in DB:", foldersRaw.length);
-
-        // Show/Hide Save Here button
-        if (movingDocId && currentFolderId !== null) {
-            finalizeMoveBtn.classList.remove('hidden');
-        } else if (movingDocId) {
-            finalizeMoveBtn.classList.add('hidden');
-        }
-
-        if (currentFolderId === null) {
-            navBar.classList.add('hidden');
-            const folders = foldersRaw.filter(f => !f.parent_id || f.parent_id === 'null')
-                                      .sort((a,b) => b.id - a.id);
-            console.log("Root Folders Found:", folders.length);
-            
-            if (folders.length === 0 && !movingDocId) {
-                docList.innerHTML = `<p style="text-align:center; grid-column:1/-1; color:gray; margin-top:2rem;">${t('empty_view')}</p>`;
-            }
-            folders.forEach(f => renderFolderCard(f));
-        } else {
-            const folder = await db.folders.get(currentFolderId);
-            navBar.classList.remove('hidden');
-            document.getElementById('nav-path').innerText = `${t('nav_path_root')} > ${folder.name}`;
-            
-            // Subfolders: Filter where parent_id is currentFolderId
-            const foldersRaw = await db.folders.toArray();
-            const subfolders = foldersRaw.filter(f => String(f.parent_id) === String(currentFolderId))
-                                         .sort((a,b) => b.id - a.id);
-            subfolders.forEach(f => renderFolderCard(f));
-            
-            // Documents in folder
-            const docsRaw = await db.documents.toArray();
-            const docsInFolder = docsRaw.filter(d => String(d.folder_id) === String(currentFolderId))
-                                        .sort((a,b) => b.id - a.id);
-            docsInFolder.forEach(d => renderDocCard(d));
-
-            if (subfolders.length === 0 && docsInFolder.length === 0) {
-                docList.innerHTML += `<p style="text-align:center; grid-column:1/-1; color:gray; margin-top:2rem;">${t('empty_folder')}</p>`;
-            }
-        }
-    } else {
-        navBar.classList.add('hidden');
-        let docs = await db.documents.toArray();
-        if (searchTerm) {
-            docs = docs.filter(d => {
-                // Search in current language title
-                const currentTitle = getDocTitle(d, currentLang).toLowerCase();
-                if (currentTitle.includes(searchTerm)) return true;
-                
-                // Search in ALL available translations if they exist
-                if (d.fields_json) {
-                    return Object.values(d.fields_json).some(langData => 
-                        langData.title && langData.title.toLowerCase().includes(searchTerm)
-                    );
+            if (currentView === "folders") {
+                const foldersRaw = await db.folders.toArray();
+                console.log("Total Folders in DB:", foldersRaw.length);
+    
+                // Show/Hide Save Here button
+                if (movingDocId && currentFolderId !== null) {
+                    finalizeMoveBtn.classList.remove('hidden');
+                } else if (movingDocId) {
+                    finalizeMoveBtn.classList.add('hidden');
+                }
+    
+                if (currentFolderId === null) {
+                    navBar.classList.add('hidden');
+                    const folders = foldersRaw.filter(f => !f.parent_id || f.parent_id === 'null')
+                                              .sort((a,b) => b.id - a.id);
+                    console.log("Root Folders Found:", folders.length);
+                    
+                    if (folders.length === 0 && !movingDocId) {
+                        docList.innerHTML = `<p style="text-align:center; grid-column:1/-1; color:gray; margin-top:2rem;">${t('empty_view')}</p>`;
+                    }
+                    folders.forEach(f => renderFolderCard(f));
+                } else {
+                    const folder = await db.folders.get(currentFolderId);
+                    navBar.classList.remove('hidden');
+                    document.getElementById('nav-path').innerText = `${t('nav_path_root')} > ${folder.name}`;
+                    
+                    // Subfolders: Filter where parent_id is currentFolderId
+                    const foldersRaw = await db.folders.toArray();
+                    const subfolders = foldersRaw.filter(f => String(f.parent_id) === String(currentFolderId))
+                                                 .sort((a,b) => b.id - a.id);
+                    subfolders.forEach(f => renderFolderCard(f));
+                    
+                    // Documents in folder
+                    const docsRaw = await db.documents.toArray();
+                    const docsInFolder = docsRaw.filter(d => String(d.folder_id) === String(currentFolderId))
+                                                .sort((a,b) => b.id - a.id);
+                    docsInFolder.forEach(d => renderDocCard(d));
+    
+                    if (subfolders.length === 0 && docsInFolder.length === 0) {
+                        docList.innerHTML += `<p style="text-align:center; grid-column:1/-1; color:gray; margin-top:2rem;">${t('empty_folder')}</p>`;
+                    }
+                }
+            } else {
+                navBar.classList.add('hidden');
+                let docs = await db.documents.toArray();
+                if (searchTerm) {
+                    docs = docs.filter(d => {
+                        // Search in current language title
+                        const currentTitle = getDocTitle(d, currentLang).toLowerCase();
+                        if (currentTitle.includes(searchTerm)) return true;
+                        
+                        // Search in ALL available translations if they exist
+                        if (d.fields_json) {
+                            return Object.values(d.fields_json).some(langData => 
+                                langData.title && langData.title.toLowerCase().includes(searchTerm)
+                            );
+                        }
+                        
+                        // Fallback to base title
+                        return d.title.toLowerCase().includes(searchTerm);
+                    });
                 }
                 
-                // Fallback to base title
-                return d.title.toLowerCase().includes(searchTerm);
-            });
+                if (docs.length === 0) {
+                    docList.innerHTML = `<p style="text-align:center; grid-column:1/-1; color:gray; margin-top:2rem;">${t('empty_all')}</p>`;
+                } else {
+                    docs.sort((a,b) => b.id - a.id).forEach(d => renderDocCard(d));
+                }
+            }
+        } finally {
+            isRendering = false;
         }
-        
-        if (docs.length === 0) {
-            docList.innerHTML = `<p style="text-align:center; grid-column:1/-1; color:gray; margin-top:2rem;">${t('empty_all')}</p>`;
-        } else {
-            docs.sort((a,b) => b.id - a.id).forEach(d => renderDocCard(d));
-        }
-    }
+    }, 30); // 30ms is enough to batch multiple calls without visible delay
 }
 
-function renderFolderCard(folder) {
+async function renderFolderCard(folder) {
     const card = document.createElement('div');
     card.className = 'folder-card';
     const isNew = folder.id === newlyCreatedFolderId;
