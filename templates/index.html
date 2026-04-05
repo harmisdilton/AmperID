@@ -5,17 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ArmperID - Իմ փաստաթղթերը</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v=79">
+    <link rel="stylesheet" href="/static/css/styles.css?v=86">
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
-
-    <!-- PWA Settings -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#ffffff">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="AmperID">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="apple-touch-icon" href="/static/img/icon-512.png">
 </head>
 
 <body class="light-theme">
@@ -31,6 +22,14 @@
                     <span class="logo-icon">💠</span>
                     <span class="brand-name">AmperID</span>
                 </div>
+                <!-- Theme Toggle Switch -->
+                <div class="theme-switch-wrapper" style="margin-left: auto; margin-right: 15px;">
+                    <label class="theme-switch" for="checkbox">
+                        <input type="checkbox" id="checkbox" />
+                        <div class="slider round"></div>
+                    </label>
+                </div>
+
                 <!-- Language Switcher -->
                 <div class="lang-switcher">
                     <div class="lang-selected" id="lang-menu-trigger">
@@ -269,7 +268,7 @@
         </div>
     </div>
 
-    <script src="/static/js/app.js?v=82"></script>
+    <script src="/static/js/app.js?v=85"></script>
 </body>
 
 </html>

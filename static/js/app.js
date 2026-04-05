@@ -256,6 +256,38 @@ const translations = {
 };
 
 let currentLang = localStorage.getItem('amp_lang') || 'hy';
+let currentTheme = localStorage.getItem('amp_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+function initTheme() {
+    const body = document.body;
+    const themeCheckbox = document.getElementById('checkbox');
+    
+    if (currentTheme === 'dark') {
+        body.classList.remove('light-theme');
+        body.classList.add('dark-theme');
+        if (themeCheckbox) themeCheckbox.checked = true;
+    } else {
+        body.classList.remove('dark-theme');
+        body.classList.add('light-theme');
+        if (themeCheckbox) themeCheckbox.checked = false;
+    }
+}
+
+function toggleTheme() {
+    const body = document.body;
+    const themeCheckbox = document.getElementById('checkbox');
+    
+    if (themeCheckbox.checked) {
+        body.classList.remove('light-theme');
+        body.classList.add('dark-theme');
+        currentTheme = 'dark';
+    } else {
+        body.classList.remove('dark-theme');
+        body.classList.add('light-theme');
+        currentTheme = 'light';
+    }
+    localStorage.setItem('amp_theme', currentTheme);
+}
 
 function t(key, params = {}) {
     let str = translations[currentLang][key] || key;
@@ -1070,14 +1102,21 @@ scrollToTopBtn.onclick = () => {
 };
 
 // Initial state
+initTheme();
 renderDocuments();
 // updateStaticTranslations(); // Initial translation update
 
-// --- Service Worker Registration for PWA ---
+const themeCheckbox = document.getElementById('checkbox');
+if (themeCheckbox) {
+    themeCheckbox.onchange = toggleTheme;
+}
+
+// --- PWA Cleanup: Unregister any existing service workers ---
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('Service Worker registered', reg))
-            .catch(err => console.error('Service Worker registration failed', err));
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (let registration of registrations) {
+            registration.unregister();
+            console.log('Old Service Worker unregistered');
+        }
     });
 }
