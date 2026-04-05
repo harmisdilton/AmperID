@@ -252,6 +252,21 @@ function t(key, params = {}) {
     return str;
 }
 
+/**
+ * Helpler to get the correct document title based on the current language
+ */
+function getDocTitle(doc, lang = currentLang) {
+    if (!doc.fields_json) return doc.title;
+    
+    const fieldsRaw = doc.fields_json;
+    if (fieldsRaw[lang] && fieldsRaw[lang].title) {
+        return fieldsRaw[lang].title;
+    }
+    
+    // Fallback order: Current Lang -> Armenian -> Stored Title
+    return fieldsRaw['hy']?.title || doc.title || t('doc_default_name');
+}
+
 function initLangSwitcher() {
     const trigger = document.getElementById('lang-menu-trigger');
     const dropdown = document.getElementById('lang-dropdown');
@@ -606,7 +621,21 @@ async function renderDocuments() {
         navBar.classList.add('hidden');
         let docs = await db.documents.toArray();
         if (searchTerm) {
-            docs = docs.filter(d => d.title.toLowerCase().includes(searchTerm));
+            docs = docs.filter(d => {
+                // Search in current language title
+                const currentTitle = getDocTitle(d, currentLang).toLowerCase();
+                if (currentTitle.includes(searchTerm)) return true;
+                
+                // Search in ALL available translations if they exist
+                if (d.fields_json) {
+                    return Object.values(d.fields_json).some(langData => 
+                        langData.title && langData.title.toLowerCase().includes(searchTerm)
+                    );
+                }
+                
+                // Fallback to base title
+                return d.title.toLowerCase().includes(searchTerm);
+            });
         }
         docs.sort((a,b) => b.id - a.id).forEach(d => renderDocCard(d));
     }
@@ -657,7 +686,8 @@ function renderDocCard(doc) {
     div.className = 'doc-card';
     const thumb = doc.thumbnail_data ? `<img src="${doc.thumbnail_data}" class="doc-thumbnail">` : `<div class="doc-thumbnail" style="display:flex;align-items:center;justify-content:center;font-size:2rem;">📄</div>`;
     const dateLocale = currentLang === 'hy' ? 'hy-AM' : currentLang === 'ru' ? 'ru-RU' : 'en-US';
-    div.innerHTML = `${thumb}<h3>${doc.title}</h3><p style="font-size:0.7rem; color:gray;">${new Date(doc.created_at).toLocaleDateString(dateLocale)}</p>`;
+    const displayTitle = getDocTitle(doc);
+    div.innerHTML = `${thumb}<h3>${displayTitle}</h3><p style="font-size:0.7rem; color:gray;">${new Date(doc.created_at).toLocaleDateString(dateLocale)}</p>`;
     
     div.onclick = () => { if (!div.classList.contains('long-pressing')) openDetail(doc.id); };
     
@@ -679,12 +709,11 @@ async function openDetail(id) {
     
     const fieldsRaw = doc.fields_json || {};
     let fields = {};
-    let displayTitle = doc.title;
+    let displayTitle = getDocTitle(doc);
 
     // Logic to select fields based on current language or fallback
     if (fieldsRaw[currentLang]) {
         fields = fieldsRaw[currentLang].data;
-        displayTitle = fieldsRaw[currentLang].title || doc.title;
     } else if (fieldsRaw.տվյալներ) {
         // Fallback for old Armenian-only format
         fields = fieldsRaw.տվյալներ;
