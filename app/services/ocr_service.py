@@ -1,14 +1,19 @@
 import io
 import json
 import asyncio
+import os
 from PIL import Image, ImageEnhance, ImageFilter
 from google import genai
 from google.genai import types
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 class OCRService:
     def __init__(self):
-        # Initialize Gemini settings with hardcoded key from test.py
-        self.api_key = "AIzaSyBj_PYk1E2v_qz6KgPxPgcatn3h6yRp68Y"
+        # Initialize Gemini settings with API key from environment variable
+        self.api_key = os.getenv("GEMINI_API_KEY")
         self.client = genai.Client(api_key=self.api_key)
         self.model = "gemini-2.5-flash"
 
