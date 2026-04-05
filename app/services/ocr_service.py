@@ -13,7 +13,7 @@ load_dotenv()
 class OCRService:
     def __init__(self):
         # Initialize Gemini settings with API key from environment variable
-        self.api_key = os.getenv("GEMINI_API_KEY")
+        self.api_key = os.getenv("api_key")
         self.client = genai.Client(api_key=self.api_key)
         self.model = "gemini-2.5-flash"
 
