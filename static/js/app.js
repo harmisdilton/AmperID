@@ -43,6 +43,7 @@ const closeCtxMenu = document.getElementById('close-ctx-menu');
 const moveDocName = document.getElementById('move-doc-name');
 const finalizeMoveBtn = document.getElementById('finalize-move-btn');
 const cancelMoveBtn = document.getElementById('cancel-move-btn');
+const profileTextEl = document.getElementById('user-profile-text');
 
 // State
 let searchTerm = "";
@@ -437,10 +438,17 @@ document.getElementById('show-profile-btn').onclick = async () => {
 
     try {
         profileTextEl.innerText = t('about_me_generating');
+        
+        // OPTIMIZATION: Only send the essential fields to the AI, removing heavy base64 strings
+        const essentialDocsData = allDocs.map(d => ({
+            title: d.title,
+            fields_json: d.fields_json
+        }));
+
         const res = await fetch('/api/process/generate-profile', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(allDocs)
+            body: JSON.stringify(essentialDocsData)
         });
         const data = await res.json();
         const profileData = data.profile || {};

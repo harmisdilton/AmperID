@@ -228,19 +228,30 @@ class OCRService:
                 fields = lang_data.get("data", {})
             elif isinstance(fields_json, dict) and "data" in fields_json:
                 fields = fields_json.get("data", {})
+            elif isinstance(fields_json, dict):
+                # Fallback: Treat as a flat dictionary, excluding non-data keys
+                fields = {k: v for k, v in fields_json.items() 
+                         if k not in ["title", "suggested_folder", "pdf_data", "thumbnail_data", "hy", "ru", "en"]}
                 
             if fields:
                 data_summary += f"\nDocument {i+1}: " + ", ".join([f"{k}: {v}" for k, v in fields.items()])
 
         if not data_summary:
             return {"hy": "Փաստաթղթերում տվյալներ չեն գտնվել:", "ru": "Данные в документах не найдены:", "en": "No data found in documents:"}
+            
+        print(f"DEBUG: Data summary for synthesis (Docs received: {len(all_docs_data)}): {data_summary}")
 
         prompt = f"""
-        Based on the following document data, compose a concise and professional biography of this person.
+        You are AmperID Synthesis Engine. 
+        TASK: Based on the following document data, compose a SINGLE concise and professional biography of this person.
+        
+        IMPORTANT: Use information (Full Name, Date of Birth, ID Numbers, Addresses, etc.) from ALL provided documents below to create a cohesive story. 
+        Do NOT just focus on the last document. Synthesize all provided information into one unified narrative.
+        
         Provide the response in THREE languages: Armenian (hy), Russian (ru), and English (en).
         Format the response as a JSON object only. No titles or headers in the text.
         
-        Data: {data_summary}
+        DATA FROM ALL DOCUMENTS: {data_summary}
         
         OUTPUT FORMAT (JSON ONLY):
         {{
