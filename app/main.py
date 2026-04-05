@@ -1,3 +1,6 @@
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse, FileResponse
 from app.api import process
 import os
@@ -7,11 +10,11 @@ app = FastAPI(title="ArmperID")
 # Serve manifest and sw from root
 @app.get("/manifest.json")
 async def get_manifest():
-    return FileResponse("static/manifest.json")
+    return FileResponse("static/manifest.json", media_type="application/manifest+json")
 
 @app.get("/sw.js")
 async def get_sw():
-    return FileResponse("static/sw.js")
+    return FileResponse("static/sw.js", media_type="application/javascript")
 
 # Ensure uploads directory exists for temp processing
 os.makedirs("uploads/temp", exist_ok=True)
