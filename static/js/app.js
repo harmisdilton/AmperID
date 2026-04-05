@@ -117,6 +117,9 @@ const translations = {
         field_val_label: "Արժեքը",
         moved_msg: "Փաստաթուղթը տեղափոխված է:",
         move_info_prefix: "Տեղափոխել: ",
+        privacy_policy_btn: "Գաղտնիության քաղաքականություն",
+        privacy_policy_title: "Գաղտնիության քաղաքականություն",
+        privacy_policy_text: "AmperID-ն առաջնահերթություն է տալիս ձեր գաղտնիությանը: Բոլոր ձեր փաստաթղթերը և տվյալները պահպանվում են բացառապես ձեր սարքի վրա (Local Storage): Մենք չունենք սերվերային տվյալների բազա ձեր անձնական տվյալների համար: AI-ի մշակման ժամանակ պատկերները ուղարկվում են միայն վերլուծության համար և չեն պահպանվում սերվերում: Դուք ցանկացած պահի կարող եք ջնջել բոլոր տվյալները «Ջնջել բոլոր տվյալները» կոճակի միջոցով:",
         flag: "🇦🇲"
     },
     ru: {
@@ -178,6 +181,9 @@ const translations = {
         field_val_label: "Значение",
         moved_msg: "Документ перемещен.",
         move_info_prefix: "Переместить: ",
+        privacy_policy_btn: "Политика конфиденциальности",
+        privacy_policy_title: "Политика конфиденциальности",
+        privacy_policy_text: "AmperID уделяет первостепенное внимание вашей конфиденциальности. Все ваши документы и данные хранятся исключительно на вашем устройстве (Локальное хранилище). У нас нет серверной базы данных для ваших личных данных. При обработке ИИ изображения отправляются только для анализа и не сохраняются на сервере. Вы можете в любой момент удалить все свои данные с помощью кнопки «Удалить все данные».",
         flag: "🇷🇺"
     },
     en: {
@@ -239,6 +245,9 @@ const translations = {
         field_val_label: "Value",
         moved_msg: "Document moved.",
         move_info_prefix: "Move: ",
+        privacy_policy_btn: "Privacy Policy",
+        privacy_policy_title: "Privacy Policy",
+        privacy_policy_text: "AmperID prioritizes your privacy. All your documents and data are stored exclusively on your device (Local Storage). We do not have a server-side database for your personal data. During AI processing, images are sent only for analysis and are not stored on the server. You can delete all your data at any time via the 'Reset All Data' button.",
         flag: "🇺🇸"
     }
 };
@@ -310,11 +319,15 @@ function updateStaticTranslations() {
     // Modals
     document.querySelector('#user-menu-modal h2').innerText = t('account_title');
     document.getElementById('show-profile-btn').innerText = t('show_profile');
+    document.getElementById('show-privacy-btn').innerText = t('privacy_policy_btn');
     document.getElementById('reset-all-data-btn').innerText = t('reset_data');
-    
-    document.querySelector('#profile-modal h2').innerText = t('about_me_title');
-    document.querySelector('#profile-modal p').innerText = t('about_me_disclaimer');
+
+    document.getElementById('profile-title-text').innerText = t('about_me_title');
+    document.getElementById('profile-disclaimer').innerText = t('about_me_disclaimer');
     document.getElementById('close-profile-btn').innerText = t('close');
+
+    document.getElementById('privacy-title-text').innerText = t('privacy_policy_title');
+    document.getElementById('close-privacy-btn').innerText = t('close');
     
     document.querySelector('#upload-modal h2').innerText = t('new_doc_title');
     document.querySelector('.camera-btn:not(.secondary)').firstChild.textContent = t('capture_btn') + " ";
@@ -461,6 +474,19 @@ document.getElementById('show-profile-btn').onclick = async () => {
 
 document.getElementById('close-profile').onclick = () => profileModal.classList.add('hidden');
 document.getElementById('close-profile-btn').onclick = () => profileModal.classList.add('hidden');
+
+// Privacy Policy Modal Logic
+const privacyModal = document.getElementById('privacy-modal');
+const privacyTextContent = document.getElementById('privacy-text-content');
+
+document.getElementById('show-privacy-btn').onclick = () => {
+    userMenuModal.classList.add('hidden');
+    privacyModal.classList.remove('hidden');
+    privacyTextContent.innerText = t('privacy_policy_text');
+};
+
+document.getElementById('close-privacy').onclick = () => privacyModal.classList.add('hidden');
+document.getElementById('close-privacy-btn').onclick = () => privacyModal.classList.add('hidden');
 
 document.getElementById('reset-all-data-btn').onclick = async () => {
     if (confirm(t('confirm_reset'))) {

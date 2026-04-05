@@ -104,8 +104,11 @@
                     <button id="close-user-menu" style="background:none; border:none; font-size:1.5rem;">×</button>
                 </div>
                 <div class="menu-actions">
-                    <button id="show-profile-btn" class="primary-btn" style="margin-bottom: 1rem;">
+                    <button id="show-profile-btn" class="primary-btn" style="margin-bottom: 0.75rem;">
                         Իմ մասին (AI)
+                    </button>
+                    <button id="show-privacy-btn" class="primary-btn" style="margin-bottom: 1rem; background-color: var(--accent-light); color: var(--text-primary); border: 1px solid var(--border-color);">
+                        Գաղտնիության քաղաքականություն
                     </button>
                     <button id="reset-all-data-btn" class="danger-btn">
                         Ջնջել բոլոր տվյալները
@@ -116,22 +119,39 @@
 
         <!-- Profile Modal (About Me) -->
         <div id="profile-modal" class="modal hidden">
-            <div class="modal-content wide">
-                <div class="modal-header">
-                    <h2>Իմ մասին</h2>
-                    <button id="close-profile" style="background:none; border:none; font-size:1.5rem;">×</button>
-                </div>
-                <div id="user-profile-text" class="profile-text-container">
-                    Պրոֆիլը բեռնվում է...
-                </div>
-                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2rem;">
-                    * Այս տեքստը ստեղծվել է AI-ի կողմից՝ հիմնվելով ձեր բոլոր փաստաթղթերի վրա:
-                </p>
-                <button id="close-profile-btn" class="link-btn">Փակել</button>
+            <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 id="profile-title-text">Իմ մասին</h2>
+                <button id="close-profile" style="background:none; border:none; font-size:1.5rem;">×</button>
+            </div>
+            <div id="user-profile-text" class="profile-text-container">
+                Պրոֆիլը բեռնվում է...
+            </div>
+            <p id="profile-disclaimer" style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 1rem; font-style: italic;">
+                * Այս տեքստը ստեղծվել է AI-ի կողմից՝ հիմնվելով ձեր բոլոր փաստաթղթերի վրա:
+            </p>
+            <div class="actions">
+                <button id="close-profile-btn" class="primary-btn">Փակել</button>
             </div>
         </div>
+    </div>
 
-        <!-- Upload Modal (Document Builder) -->
+    <!-- Privacy Policy Modal -->
+    <div id="privacy-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 id="privacy-title-text">Գաղտնիության քաղաքականություն</h2>
+                <button id="close-privacy" style="background:none; border:none; font-size:1.5rem;">×</button>
+            </div>
+            <div id="privacy-text-content" class="profile-text-container" style="font-size: 0.9rem; line-height: 1.6; text-align: left; max-height: 60vh; overflow-y: auto;">
+                <!-- Content will be injected via JS -->
+            </div>
+            <div class="actions">
+                <button id="close-privacy-btn" class="primary-btn">Փակել</button>
+            </div>
+        </div>
+    </div>
+     <!-- Upload Modal (Document Builder) -->
         <div id="upload-modal" class="modal hidden">
             <div class="modal-content wide">
                 <div class="modal-header">
@@ -240,7 +260,7 @@
         </div>
     </div>
 
-    <script src="/static/js/app.js?v=73"></script>
+    <script src="/static/js/app.js?v=75"></script>
 </body>
 
 </html>
