@@ -1,0 +1,17 @@
+{
+  "name": "AmperID - Personal Document Manager",
+  "short_name": "AmperID",
+  "description": "Securely manage and analyze your personal documents with AI.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#0078d4",
+  "icons": [
+    {
+      "src": "/static/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
