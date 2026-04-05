@@ -107,6 +107,7 @@ const translations = {
         new_folder_placeholder: "Նոր թղթապանակ",
         empty_view: "Թղթապանակներ դեռ չկան",
         empty_folder: "Թղթապանակը դատարկ է",
+        empty_all: "Փաստաթղթեր չկան",
         saved_msg: "Պահպանված է",
         error_ai: "Սխալ՝ ԻԻ մշակման ընթացքում:",
         error_conn: "Սխալ՝ կապի ընթացքում:",
@@ -171,6 +172,7 @@ const translations = {
         new_folder_placeholder: "Новая папка",
         empty_view: "Папок пока нет",
         empty_folder: "Папка пуста",
+        empty_all: "Нет документов",
         saved_msg: "Сохранено",
         error_ai: "Ошибка при обработке ИИ:",
         error_conn: "Ошибка связи:",
@@ -235,6 +237,7 @@ const translations = {
         new_folder_placeholder: "New Folder",
         empty_view: "No folders yet",
         empty_folder: "Folder is empty",
+        empty_all: "No documents",
         saved_msg: "Saved",
         error_ai: "AI Processing Error:",
         error_conn: "Connection error:",
@@ -475,6 +478,13 @@ document.getElementById('show-profile-btn').onclick = async () => {
 document.getElementById('close-profile').onclick = () => profileModal.classList.add('hidden');
 document.getElementById('close-profile-btn').onclick = () => profileModal.classList.add('hidden');
 
+// Close modals when clicking outside (on the background overlay)
+window.onclick = (event) => {
+    if (event.target.classList.contains('modal')) {
+        event.target.classList.add('hidden');
+    }
+};
+
 // Privacy Policy Modal Logic
 const privacyModal = document.getElementById('privacy-modal');
 const privacyTextContent = document.getElementById('privacy-text-content');
@@ -671,7 +681,12 @@ async function renderDocuments() {
                 return d.title.toLowerCase().includes(searchTerm);
             });
         }
-        docs.sort((a,b) => b.id - a.id).forEach(d => renderDocCard(d));
+        
+        if (docs.length === 0) {
+            docList.innerHTML = `<p style="text-align:center; grid-column:1/-1; color:gray; margin-top:2rem;">${t('empty_all')}</p>`;
+        } else {
+            docs.sort((a,b) => b.id - a.id).forEach(d => renderDocCard(d));
+        }
     }
 }
 
