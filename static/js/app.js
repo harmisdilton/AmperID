@@ -312,6 +312,23 @@ function getDocTitle(doc, lang = currentLang) {
     return fieldsRaw['hy']?.title || doc.title || t('doc_default_name');
 }
 
+/**
+ * Recursive search helper for document fields
+ */
+function searchInDocData(data, term) {
+    if (!data) return false;
+    if (typeof data === 'string' || typeof data === 'number') {
+        return String(data).toLowerCase().includes(term);
+    }
+    if (Array.isArray(data)) {
+        return data.some(item => searchInDocData(item, term));
+    }
+    if (typeof data === 'object') {
+        return Object.values(data).some(val => searchInDocData(val, term));
+    }
+    return false;
+}
+
 function initLangSwitcher() {
     const trigger = document.getElementById('lang-menu-trigger');
     const dropdown = document.getElementById('lang-dropdown');
@@ -705,20 +722,24 @@ async function renderDocuments() {
                 navBar.classList.add('hidden');
                 let docs = await db.documents.toArray();
                 if (searchTerm) {
+                    const term = searchTerm.toLowerCase();
                     docs = docs.filter(d => {
-                        // Search in current language title
+                        // 1. Search in current language title
                         const currentTitle = getDocTitle(d, currentLang).toLowerCase();
-                        if (currentTitle.includes(searchTerm)) return true;
+                        if (currentTitle.includes(term)) return true;
                         
-                        // Search in ALL available translations if they exist
+                        // 2. Deep search in all translations and fields
                         if (d.fields_json) {
-                            return Object.values(d.fields_json).some(langData => 
-                                langData.title && langData.title.toLowerCase().includes(searchTerm)
-                            );
+                            return Object.values(d.fields_json).some(langData => {
+                                // Search title of this translation
+                                if (langData.title && langData.title.toLowerCase().includes(term)) return true;
+                                // Recursive search in data (fields)
+                                return searchInDocData(langData.data, term);
+                            });
                         }
                         
-                        // Fallback to base title
-                        return d.title.toLowerCase().includes(searchTerm);
+                        // 3. Fallback to base title
+                        return d.title.toLowerCase().includes(term);
                     });
                 }
                 
