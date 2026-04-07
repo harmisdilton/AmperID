@@ -10,7 +10,32 @@
 </head>
 
 <body class="light-theme">
-    <div id="app">
+    <div id="lock-screen" class="hidden">
+        <div class="lock-logo">💠</div>
+        <div class="lock-title" id="lock-screen-title">Unlock AmperID</div>
+        <div class="pin-dots">
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+        </div>
+        <div class="pin-pad">
+            <div class="pin-key" data-val="1">1</div>
+            <div class="pin-key" data-val="2">2</div>
+            <div class="pin-key" data-val="3">3</div>
+            <div class="pin-key" data-val="4">4</div>
+            <div class="pin-key" data-val="5">5</div>
+            <div class="pin-key" data-val="6">6</div>
+            <div class="pin-key" data-val="7">7</div>
+            <div class="pin-key" data-val="8">8</div>
+            <div class="pin-key" data-val="9">9</div>
+            <div class="pin-key action" id="pin-bio-trigger">🧬</div>
+            <div class="pin-key" data-val="0">0</div>
+            <div class="pin-key action" id="pin-delete">⌫</div>
+        </div>
+    </div>
+
+    <div id="app" class="app-hidden">
         <div id="loader" class="loader-container hidden">
             <div class="spinner"></div>
             <p id="loader-status">Մշակվում է...</p>
@@ -22,12 +47,15 @@
                     <span class="logo-icon">💠</span>
                     <span class="brand-name">AmperID</span>
                 </div>
-                <!-- Theme Toggle Switch -->
-                <div class="theme-switch-wrapper" style="margin-left: auto; margin-right: 15px;">
-                    <label class="theme-switch" for="checkbox">
-                        <input type="checkbox" id="checkbox" />
-                        <div class="slider round"></div>
-                    </label>
+                <!-- Theme Toggle & Lock -->
+                <div class="header-actions" style="margin-left: auto; margin-right: 15px;">
+                    <button id="manual-lock-btn" class="icon-btn" title="Lock App">🔒</button>
+                    <div class="theme-switch-wrapper">
+                        <label class="theme-switch" for="checkbox">
+                            <input type="checkbox" id="checkbox" />
+                            <div class="slider round"></div>
+                        </label>
+                    </div>
                 </div>
 
                 <!-- Language Switcher -->
@@ -121,7 +149,16 @@
                     <button id="reset-all-data-btn" class="danger-btn">
                         Ջնջել բոլոր տվյալները
                     </button>
+
+                    <div class="security-section">
+                        <h3 id="security-title" style="margin-bottom: 1rem; font-size: 1.1rem;">🔒 Fast Security</h3>
+                        <p class="security-info" id="security-info">Set a 4-digit PIN to protect your personal documents from unauthorized access.</p>
+                        <button id="set-pin-btn" class="link-btn">Set PIN Code</button>
+                        <button id="remove-pin-btn" class="danger-btn hidden">Remove PIN Code</button>
+                        <button id="biometric-btn" class="link-btn hidden">Enable Biometrics</button>
+                    </div>
                 </div>
+                <p id="app-version" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem;">AmperID v1.0.92</p>
             </div>
         </div>
 
@@ -135,6 +172,9 @@
             <div id="user-profile-text" class="profile-text-container">
                 Պրոֆիլը բեռնվում է...
             </div>
+
+
+                <button id="reset-all-btn" class="danger-btn" style="margin-top: 2rem;">Reset All Data</button>
             <p id="profile-disclaimer" style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 1rem; font-style: italic;">
                 * Այս տեքստը ստեղծվել է AI-ի կողմից՝ հիմնվելով ձեր բոլոր փաստաթղթերի վրա:
             </p>
@@ -268,7 +308,9 @@
         </div>
     </div>
 
-    <script src="/static/js/app.js?v=87"></script>
+    </div>
+
+    <script src="/static/js/app.js?v=93"></script>
 </body>
 
 </html>

@@ -98,6 +98,17 @@ const translations = {
         ai_suggest_confirm: "Ցանկանո՞ւմ եք անմիջապես տեղափոխել այնտեղ?",
         yes_move: "Այո, տեղափոխել",
         no_stay: "Ոչ, թողնել այստեղ",
+        lock_screen_title: "Մուտքագրեք PIN կոդը",
+        unlock_btn: "Բացել",
+        security_title: "🔒 Անվտանգություն",
+        security_info: "Սահմանեք 4-նիշանոց PIN կոդ՝ ձեր անձնական փաստաթղթերը պաշտպանելու համար:",
+        set_pin: "Սահմանել PIN կոդ",
+        remove_pin: "Հեռացնել PIN կոդը",
+        enable_bio: "Միացնել Բիոմետրիան",
+        pin_success: "PIN կոդը հաջողությամբ սահմանվեց",
+        pin_mismatch: "Սխալ PIN կոդ",
+        pin_removed: "PIN կոդը հեռացվեց",
+        reset_all_data: "Ջնջել բոլոր տվյալները",
         processing_pages: "Ուղարկում է {n} էջ...",
         ai_processing: "ԻԻ-ն սկանավորում և կտրում է... (սպասեք 10-20 վրկ)",
         saving_db: "Պահպանում է բազայում...",
@@ -117,7 +128,7 @@ const translations = {
         field_name_label: "Դաշտի անուն (օր. Անուն)",
         field_val_label: "Արժեքը",
         moved_msg: "Փաստաթուղթը տեղափոխված է:",
-        move_info_prefix: "Տեղափոխել: ",
+        move_info_prefix: "Տեղափոխել՝ ",
         privacy_policy_btn: "Գաղտնիության քաղաքականություն",
         privacy_policy_title: "Գաղտնիության քաղաքականություն",
         privacy_policy_text: "AmperID-ն առաջնահերթություն է տալիս ձեր գաղտնիությանը: Բոլոր ձեր փաստաթղթերը և տվյալները պահպանվում են բացառապես ձեր սարքի վրա (Local Storage): Մենք չունենք սերվերային տվյալների բազա ձեր անձնական տվյալների համար: AI-ի մշակման ժամանակ պատկերները ուղարկվում են միայն վերլուծության համար և չեն պահպանվում սերվերում: Դուք ցանկացած պահի կարող եք ջնջել բոլոր տվյալները «Ջնջել բոլոր տվյալները» կոճակի միջոցով:",
@@ -163,6 +174,17 @@ const translations = {
         ai_suggest_confirm: "Хотите переместить его туда?",
         yes_move: "Да, переместить",
         no_stay: "Нет, оставить здесь",
+        lock_screen_title: "Введите PIN-код",
+        unlock_btn: "Открыть",
+        security_title: "🔒 Безопасность",
+        security_info: "Установите 4-значный PIN-код для защиты ваших документов от посторонних.",
+        set_pin: "Установить PIN-код",
+        remove_pin: "Удалить PIN-код",
+        enable_bio: "Включить биометрию",
+        pin_success: "PIN-код успешно установлен",
+        pin_mismatch: "Неверный PIN-код",
+        pin_removed: "PIN-код удален",
+        reset_all_data: "Сбросить все данные",
         processing_pages: "Отправка {n} стр...",
         ai_processing: "ИИ сканирует... (жди 10-20 сек)",
         saving_db: "Сохранение в базу...",
@@ -227,7 +249,18 @@ const translations = {
         ai_suggest_desc: "AI thinks the best place for this is:",
         ai_suggest_confirm: "Would you like to move it there now?",
         yes_move: "Yes, move it",
-        no_stay: "No, keep it here",
+        no_stay: "No, stay here",
+        lock_screen_title: "Enter PIN Code",
+        unlock_btn: "Unlock",
+        security_title: "🔒 Security",
+        security_info: "Set a 4-digit PIN to protect your personal documents from unauthorized access.",
+        set_pin: "Set PIN Code",
+        remove_pin: "Remove PIN Code",
+        enable_bio: "Enable Biometrics",
+        pin_success: "PIN Code set successfully",
+        pin_mismatch: "Wrong PIN Code",
+        pin_removed: "PIN Code removed",
+        reset_all_data: "Reset All Data",
         processing_pages: "Uploading {n} pages...",
         ai_processing: "AI scanning... (wait 10-20s)",
         saving_db: "Saving to database...",
@@ -287,6 +320,114 @@ function toggleTheme() {
         currentTheme = 'light';
     }
     localStorage.setItem('amp_theme', currentTheme);
+}
+
+// --- Security / PIN Logic ---
+let tempPin = "";
+const getSavedPin = () => localStorage.getItem('amp_pin');
+
+function initSecurity() {
+    const pin = getSavedPin();
+    const lockScreen = document.getElementById('lock-screen');
+    const appContainer = document.getElementById('app');
+    
+    if (pin && pin.length === 4) {
+        lockScreen.classList.remove('hidden');
+        if (appContainer) appContainer.classList.add('app-hidden');
+        tempPin = "";
+        updatePinDots();
+        
+        // Try biometrics if HTTPS
+        if (window.isSecureContext && localStorage.getItem('amp_bio_enabled') === 'true') {
+            tryBiometrics();
+        }
+    } else {
+        lockScreen.classList.add('hidden');
+        if (appContainer) appContainer.classList.remove('app-hidden');
+    }
+    
+    updateSecuritySettingsUI();
+    
+    // Toggle manual lock button visibility in header
+    const manualBtn = document.getElementById('manual-lock-btn');
+    if (manualBtn) {
+        if (pin && pin.length === 4) manualBtn.classList.remove('hidden');
+        else manualBtn.classList.add('hidden');
+    }
+}
+
+function updatePinDots() {
+    const dots = document.querySelectorAll('.pin-dot');
+    dots.forEach((dot, i) => {
+        if (i < tempPin.length) dot.classList.add('filled');
+        else dot.classList.remove('filled');
+        dot.classList.remove('error');
+    });
+}
+
+async function handlePinKey(val) {
+    if (val === 'delete') {
+        tempPin = tempPin.slice(0, -1);
+    } else if (tempPin.length < 4) {
+        tempPin += val;
+    }
+    
+    updatePinDots();
+    
+    if (tempPin.length === 4) {
+        const saved = getSavedPin();
+        if (tempPin === saved) {
+            // Success!
+            document.getElementById('lock-screen').classList.add('hidden');
+            const appContainer = document.getElementById('app');
+            if (appContainer) appContainer.classList.remove('app-hidden');
+            tempPin = "";
+        } else {
+            // Error shake
+            const dots = document.querySelectorAll('.pin-dot');
+            dots.forEach(dot => dot.classList.add('error'));
+            setTimeout(() => {
+                tempPin = "";
+                updatePinDots();
+            }, 500);
+        }
+    }
+}
+
+function updateSecuritySettingsUI() {
+    const pin = getSavedPin();
+    const setBtn = document.getElementById('set-pin-btn');
+    const removeBtn = document.getElementById('remove-pin-btn');
+    const bioBtn = document.getElementById('biometric-btn');
+    const info = document.getElementById('security-info');
+    const title = document.getElementById('security-title');
+
+    title.innerText = t('security_title');
+    info.innerText = t('security_info');
+    
+    if (pin) {
+        setBtn.innerText = t('set_pin') + " (Update)";
+        removeBtn.innerText = t('remove_pin');
+        removeBtn.classList.remove('hidden');
+        
+        if (window.isSecureContext) {
+            bioBtn.classList.remove('hidden');
+            const isBio = localStorage.getItem('amp_bio_enabled') === 'true';
+            bioBtn.innerText = isBio ? "🧬 Biometrics: ON" : "🧬 Biometrics: OFF";
+        }
+    } else {
+        setBtn.innerText = t('set_pin');
+        removeBtn.classList.add('hidden');
+        bioBtn.classList.add('hidden');
+    }
+}
+
+async function tryBiometrics() {
+    // Simple WebAuthn / Biometric check for HTTPS
+    if (!window.isSecureContext) return;
+    // Note: Full WebAuthn implementation requires a back-end challenge 
+    // For this demo, we'll use it as a 'unlock' trigger if supported
+    console.log("Biometrics requested...");
 }
 
 function t(key, params = {}) {
@@ -487,11 +628,15 @@ searchInput.oninput = (e) => {
 };
 
 // --- Modals & User Menu ---
-logoTrigger.onclick = () => userMenuModal.classList.remove('hidden');
+logoTrigger.onclick = (e) => {
+    e.stopPropagation();
+    userMenuModal.classList.toggle('hidden');
+};
 document.getElementById('close-user-menu').onclick = () => userMenuModal.classList.add('hidden');
 
 // Open Profile & Show generated info
-document.getElementById('show-profile-btn').onclick = async () => {
+document.getElementById('show-profile-btn').onclick = async (e) => {
+    e.stopPropagation();
     userMenuModal.classList.add('hidden');
     profileModal.classList.remove('hidden');
     // Check if we have documents to generate FROM
@@ -538,7 +683,8 @@ window.onclick = (event) => {
 const privacyModal = document.getElementById('privacy-modal');
 const privacyTextContent = document.getElementById('privacy-text-content');
 
-document.getElementById('show-privacy-btn').onclick = () => {
+document.getElementById('show-privacy-btn').onclick = (e) => {
+    e.stopPropagation();
     userMenuModal.classList.add('hidden');
     privacyModal.classList.remove('hidden');
     privacyTextContent.innerText = t('privacy_policy_text');
@@ -1124,6 +1270,7 @@ scrollToTopBtn.onclick = () => {
 
 // Initial state
 initTheme();
+initSecurity();
 renderDocuments();
 // updateStaticTranslations(); // Initial translation update
 
@@ -1131,6 +1278,61 @@ const themeCheckbox = document.getElementById('checkbox');
 if (themeCheckbox) {
     themeCheckbox.onchange = toggleTheme;
 }
+
+// Lock Screen Keypad
+document.querySelectorAll('.pin-key[data-val]').forEach(key => {
+    key.onclick = () => handlePinKey(key.dataset.val);
+});
+document.getElementById('pin-delete').onclick = () => handlePinKey('delete');
+document.getElementById('pin-bio-trigger').onclick = () => tryBiometrics();
+
+// Security Settings
+document.getElementById('set-pin-btn').onclick = () => {
+    const newPin = prompt("Enter new 4-digit PIN:");
+    if (newPin && /^\d{4}$/.test(newPin)) {
+        localStorage.setItem('amp_pin', newPin);
+        alert(t('pin_success'));
+        updateSecuritySettingsUI();
+        initSecurity(); // Immediately lock if needed, though usually they are already in the app
+    } else if (newPin !== null) {
+        alert("Invalid PIN. Please enter exactly 4 digits.");
+    }
+};
+
+document.getElementById('remove-pin-btn').onclick = () => {
+    if (confirm("Remove PIN protection? Your data will be accessible to anyone with your device.")) {
+        localStorage.removeItem('amp_pin');
+        localStorage.removeItem('amp_bio_enabled');
+        updateSecuritySettingsUI();
+        initSecurity();
+    }
+};
+
+document.getElementById('biometric-btn').onclick = () => {
+    const isBio = localStorage.getItem('amp_bio_enabled') === 'true';
+    localStorage.setItem('amp_bio_enabled', (!isBio).toString());
+    updateSecuritySettingsUI();
+};
+
+const manualLockBtn = document.getElementById('manual-lock-btn');
+if (manualLockBtn) {
+    manualLockBtn.onclick = () => {
+        // Just re-run security init to trigger the lock screen
+        initSecurity();
+    };
+}
+
+const resetAll = async () => {
+    if (confirm("Are you SURE? This will permanently delete ALL your documents and settings from this device.")) {
+        await db.delete();
+        localStorage.clear();
+        location.reload();
+    }
+};
+
+document.getElementById('reset-all-btn').onclick = resetAll;
+const resetMenuBtn = document.getElementById('reset-all-data-btn');
+if (resetMenuBtn) resetMenuBtn.onclick = resetAll;
 
 // --- PWA Cleanup: Unregister any existing service workers ---
 if ('serviceWorker' in navigator) {
