@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AmperID - Secure Document Share</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #0078d4;
+            --bg-light: #f3f2f1;
+            --app-bg: #ffffff;
+            --text-primary: #323130;
+            --text-secondary: #605e5c;
+            --border: #edebe9;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Segoe UI', 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--app-bg);
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .logo { font-size: 2rem; margin-bottom: 2rem; }
+        .logo span { font-weight: 800; letter-spacing: -1px; }
+
+        h2 { font-size: 1.5rem; margin-bottom: 1rem; }
+        p { color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem; }
+
+        .security-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .option-btn {
+            background: var(--bg-light);
+            border: 2px solid transparent;
+            padding: 1.5rem;
+            border-radius: 16px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .option-btn:hover {
+            border-color: var(--accent);
+            background: rgba(0, 120, 212, 0.05);
+        }
+
+        .error-msg {
+            color: #d83b01;
+            background: #fdf3f0;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        /* Full Document View */
+        #content-section.hidden { display: none; }
+        
+        #doc-image {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: 1rem;
+        }
+
+        .field-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .field-label { color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; }
+        .field-value { font-weight: 700; color: var(--text-primary); font-size: 0.95rem; }
+
+        .expired { color: #d83b01; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🚀 <span>AmperID</span></div>
+
+        <!-- Verification Section -->
+        <div id="verify-section">
+            <h2>Security Verification</h2>
+            <p>Чтобы просмотреть документ, выберите число, которое сообщил вам отправитель:</p>
+            <div id="error-box" class="error-msg">Неверное число. Попробуйте еще раз.</div>
+            <div class="security-options" id="options-grid">
+                <!-- Buttons will be injected here -->
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <div id="content-section" class="hidden">
+            <h2 id="doc-title">Document</h2>
+            <div id="doc-fields" style="margin: 1.5rem 0;"></div>
+            <div id="image-container">
+                <img id="doc-image" src="" alt="Shared Document">
+            </div>
+        </div>
+
+        <!-- Error Section -->
+        <div id="error-section" class="hidden">
+            <h2 id="error-title">Expired or Not Found</h2>
+            <p>Срок действия ссылки истек или документ был удален.</p>
+        </div>
+    </div>
+
+    <script>
+        const shareId = window.location.pathname.split('/').pop();
+        let options = [];
+
+        async function init() {
+            try {
+                const res = await fetch(`/api/share/init/${shareId}`);
+                if (!res.ok) throw new Error("Not found");
+                
+                const data = await res.json();
+                renderOptions(data.options);
+            } catch (err) {
+                showError("Expired or Not Found");
+            }
+        }
+
+        function renderOptions(opts) {
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+            opts.forEach(num => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = num;
+                btn.onclick = () => verify(num);
+                grid.appendChild(btn);
+            });
+        }
+
+        async function verify(num) {
+            try {
+                const res = await fetch(`/api/share/verify/${shareId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ security_number: num })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    showDocument(data);
+                } else {
+                    document.getElementById('error-box').style.display = 'block';
+                    setTimeout(() => document.getElementById('error-box').style.display = 'none', 3000);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function showDocument(data) {
+            document.getElementById('verify-section').classList.add('hidden');
+            document.getElementById('content-section').classList.remove('hidden');
+            document.getElementById('doc-title').innerText = data.title;
+            
+            const fieldBox = document.getElementById('doc-fields');
+            fieldBox.innerHTML = '';
+            // Display fields if any
+            if (data.fields) {
+                for (const [key, val] of Object.entries(data.fields)) {
+                    const row = document.createElement('div');
+                    row.className = 'field-row';
+                    row.innerHTML = `<span class="field-label">${key}</span><span class="field-value">${val}</span>`;
+                    fieldBox.appendChild(row);
+                }
+            }
+            
+            if (data.image) {
+                document.getElementById('doc-image').src = data.image;
+            } else {
+                document.getElementById('image-container').classList.add('hidden');
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('verify-section').classList.add('hidden');
+            document.getElementById('error-section').classList.remove('hidden');
+            document.getElementById('error-title').innerText = msg;
+        }
+
+        init();
+    </script>
+</body>
+</html>

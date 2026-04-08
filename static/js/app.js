@@ -35,6 +35,7 @@ const detailFields = document.getElementById('detail-fields');
 const scrollToTopBtn = document.getElementById('scroll-to-top');
 
 // Context Menu Elements
+const ctxShareBtn = document.getElementById('ctx-share-btn');
 const ctxMoveBtn = document.getElementById('ctx-move-btn');
 const ctxDeleteBtn = document.getElementById('ctx-delete-btn');
 const closeCtxMenu = document.getElementById('close-ctx-menu');
@@ -843,6 +844,11 @@ function goFolderForward() {
 function showDocContextMenu(doc) {
     ctxMenuModal.classList.remove('hidden');
     
+    ctxShareBtn.onclick = () => {
+        ctxMenuModal.classList.add('hidden');
+        openShareModal(doc.id);
+    };
+
     ctxDeleteBtn.onclick = async () => {
         ctxMenuModal.classList.add('hidden'); // Close context menu first
 
@@ -1158,6 +1164,9 @@ async function openDetail(id) {
         await db.documents.update(id, updates);
         alert(t('saved_msg'));
         renderDocuments();
+    };
+    document.getElementById('detail-share-btn').onclick = () => {
+        openShareModal(id);
     };
     document.getElementById('download-pdf').onclick = () => { 
         const a = document.createElement('a'); a.href = doc.pdf_data; 
@@ -1488,3 +1497,116 @@ if ('serviceWorker' in navigator) {
         }
     });
 }
+
+// --- Timed Sharing Logic ---
+let currentSharingDocId = null;
+
+function openShareModal(docId) {
+    currentSharingDocId = docId;
+    document.getElementById('share-step-time').classList.remove('hidden');
+    document.getElementById('share-step-result').classList.add('hidden');
+    document.getElementById('share-modal').classList.remove('hidden');
+    document.getElementById('share-qrcode').innerHTML = '';
+}
+
+function closeShareModal() {
+    document.getElementById('share-modal').classList.add('hidden');
+    currentSharingDocId = null;
+}
+
+async function shareDocument(docId, minutes) {
+    const btnBox = document.querySelector('#share-step-time .vertical-actions');
+    const originalContent = btnBox.innerHTML;
+    btnBox.innerHTML = `<div class="loader-small"></div><p style="text-align:center;">Генерация ссылки...</p>`;
+
+    try {
+        const doc = await db.documents.get(docId);
+        if (!doc) return;
+
+        const response = await fetch('/api/share/create', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                minutes: minutes,
+                title: doc.title,
+                image: doc.thumbnail_data, 
+                fields: doc.fields_json ? doc.fields_json[currentLang]?.data || {} : {}
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            showShareResult(data);
+        } else {
+            alert("Ошибка при создании ссылки.");
+            btnBox.innerHTML = originalContent;
+            initShareModalListeners();
+        }
+    } catch (err) {
+        console.error("Share failed:", err);
+        btnBox.innerHTML = originalContent;
+        initShareModalListeners();
+    }
+}
+
+function initShareModalListeners() {
+    const timeBtns = document.querySelectorAll('.time-btn');
+    timeBtns.forEach(btn => {
+        btn.onclick = () => {
+            const mins = btn.getAttribute('data-time');
+            if (currentSharingDocId) shareDocument(currentSharingDocId, mins);
+        };
+    });
+}
+
+function showShareResult(data) {
+    document.getElementById('share-step-time').classList.add('hidden');
+    document.getElementById('share-step-result').classList.remove('hidden');
+    
+    const shareUrl = `${window.location.origin}/share/${data.share_id}`;
+    document.getElementById('share-url').value = shareUrl;
+    document.getElementById('share-security-num').innerText = data.security_number;
+
+    const qrContainer = document.getElementById('share-qrcode');
+    qrContainer.innerHTML = '';
+    new QRCode(qrContainer, {
+        text: shareUrl,
+        width: 160,
+        height: 160,
+        colorDark : "#0078d4",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+    });
+}
+
+function copyShareUrl() {
+    const urlInput = document.getElementById('share-url');
+    urlInput.select();
+    navigator.clipboard.writeText(urlInput.value);
+    const copyBtn = document.getElementById('copy-share-url-btn');
+    const original = copyBtn.innerText;
+    copyBtn.innerText = '✅';
+    setTimeout(() => copyBtn.innerText = original, 2000);
+}
+
+// AI Response Copy logic
+const aiCopyBtn = document.getElementById('ai-copy-btn');
+if (aiCopyBtn) {
+    aiCopyBtn.onclick = () => {
+        const textToCopy = document.getElementById('ai-response-text').innerText;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            const original = aiCopyBtn.innerText;
+            aiCopyBtn.innerText = '✅';
+            setTimeout(() => aiCopyBtn.innerText = original, 2000);
+        });
+    };
+}
+
+initShareModalListeners();
+
+// Final Initialization
+initTheme();
+initSecurity();
+initLangSwitcher();
+updateStaticTranslations();
+renderDocuments();

@@ -126,6 +126,7 @@
         <div id="context-menu-modal" class="modal hidden">
             <div class="modal-content bottom-sheet">
                 <div class="menu-actions">
+                    <button id="ctx-share-btn" class="primary-btn">🔗 Поделиться (Timer)</button>
                     <button id="ctx-move-btn" class="primary-btn">📁 Ավելացնել թղթապանակում</button>
                     <button id="ctx-delete-btn" class="danger-btn">🗑️ Ջնջել</button>
                     <button id="close-ctx-menu" class="link-btn">Չեղարկել</button>
@@ -261,7 +262,13 @@
                     Պատճենել տվյալները
                 </button>
 
-                <div id="image-preview-container" style="margin-top: 1.5rem; text-align: center;">
+                <div class="actions" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 1.5rem;">
+                    <button id="save-doc-changes" class="primary-btn" style="flex: 1;">Պահպանել փոփոхությունները</button>
+                    <button id="detail-share-btn" class="primary-btn" style="flex:1; background: #0078d4;">🔗 Поделиться</button>
+                    <button id="download-pdf" class="secondary-btn" style="flex: 1;">Ներբեռնել PDF</button>
+                    <button id="delete-doc" class="danger-btn" style="flex: 1;">Ջնջել</button>
+                    <button id="share-pdf" class="hidden">Ուղարկել PDF</button> 
+                </div>
                     <img id="detail-image" src="" alt="Document Scan"
                         style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); cursor: zoom-in;"
                         onclick="window.open(this.src)">
@@ -322,8 +329,55 @@
 
     </div>
 
+    <!-- Share Document Modal -->
+    <div id="share-modal" class="modal hidden" style="z-index: 100000;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Поделиться документом</h2>
+                <button id="close-share-btn" style="background:none; border:none; font-size:1.5rem;">×</button>
+            </div>
+            
+            <!-- Step 1: Time Selection -->
+            <div id="share-step-time" class="share-step">
+                <p style="margin: 1rem 0; color: var(--text-secondary); font-size: 0.9rem;">
+                    Выберите, на какое время открыть доступ к этому документу:
+                </p>
+                <div class="vertical-actions">
+                    <button class="time-btn primary-btn" data-time="5">5 минут</button>
+                    <button class="time-btn primary-btn" data-time="30">30 минут</button>
+                    <button class="time-btn primary-btn" data-time="60">1 час</button>
+                    <button class="time-btn primary-btn" data-time="120">2 часа</button>
+                    <button class="time-btn primary-btn" data-time="1440">24 часа</button>
+                    <button id="cancel-share-btn" class="link-btn">Отмена</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Result -->
+            <div id="share-step-result" class="share-step hidden">
+                <div class="share-result-container" style="text-align: center; padding: 1rem 0;">
+                    <p style="font-size: 0.85rem; margin-bottom: 1rem;">Покажите этот QR-код или отправьте ссылку:</p>
+                    <div id="share-qrcode" style="display: flex; justify-content: center; margin-bottom: 1.5rem;"></div>
+                    
+                    <div class="share-url-box" style="display: flex; gap: 8px; margin-bottom: 1.5rem;">
+                        <input type="text" id="share-url" readonly style="flex: 1; margin-bottom: 0;">
+                        <button id="copy-share-url-btn" class="icon-btn" style="background: var(--bg-light); border: 1px solid var(--border);">📋</button>
+                    </div>
+
+                    <div class="security-number-display" style="background: var(--accent-light); padding: 1.25rem; border-radius: 12px; border: 1px dashed var(--accent);">
+                        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); font-weight: 800;">Security Number</span>
+                        <div id="share-security-num" style="font-size: 3rem; font-weight: 800; color: var(--accent); margin: 0.5rem 0;">--</div>
+                        <p style="font-size: 0.8rem; line-height: 1.4; color: var(--text-secondary);">
+                            Попросите человека выбрать это число из предложенных вариантов на странице документа.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="/static/js/app.js?v=108"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="/static/js/app.js?v=109"></script>
 </body>
 
 </html>

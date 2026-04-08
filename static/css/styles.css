@@ -1238,7 +1238,7 @@ textarea:focus {
     visibility: hidden;
     pointer-events: none;
 }
-精
+
 .lock-logo {
     font-size: 3.5rem;
     margin-bottom: 1.5rem;
@@ -1335,4 +1335,47 @@ textarea:focus {
     color: var(--text-secondary);
     margin-bottom: 1rem;
     line-height: 1.4;
+}
+
+/* --- Sharing UI --- */
+.share-url-box input {
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    padding: 10px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+}
+
+.security-number-display {
+    transition: all 0.3s ease;
+}
+
+.loader-small {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--accent-light);
+    border-top: 2px solid var(--accent);
+    border-radius: 50%;
+    animation: spin-small 0.8s linear infinite;
+    margin: 15px auto;
+}
+
+@keyframes spin-small {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.time-btn {
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.time-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 120, 212, 0.2);
+}
+
+.share-step.hidden {
+    display: none;
 }
