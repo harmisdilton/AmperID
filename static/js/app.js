@@ -464,7 +464,7 @@ function searchInDocData(data, term) {
     if (Array.isArray(data)) {
         return data.some(item => searchInDocData(item, term));
     }
-    if (typeof data === 'object') {
+    if (typeof data === 'object' && data !== null) {
         return Object.values(data).some(val => searchInDocData(val, term));
     }
     return false;
@@ -877,6 +877,7 @@ async function renderDocuments() {
                         // 2. Deep search in all translations and fields
                         if (d.fields_json) {
                             return Object.values(d.fields_json).some(langData => {
+                                if (!langData || typeof langData !== 'object') return false;
                                 // Search title of this translation
                                 if (langData.title && langData.title.toLowerCase().includes(term)) return true;
                                 // Recursive search in data (fields)

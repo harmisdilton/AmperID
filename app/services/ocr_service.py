@@ -25,13 +25,17 @@ class OCRService:
 
         prompt = """
         Return ONE bounding box covering the MAIN document area: [ymin, xmin, ymax, xmax] (0–1000).
-        Also identify the document type and size.
+        Also identify the document type, size, and decide if cropping is necessary.
+        
+        CRITICAL CROP RULE: 
+        If the document already occupies >95% of the image or looks well-framed/pre-cropped, set "should_crop" to false to avoid cutting edges.
         
         OUTPUT FORMAT (JSON ONLY):
         {
           "bounding_box": [ymin, xmin, ymax, xmax],
           "type": "Passport/ID Card/Receipt/etc",
-          "size": "small/large"
+          "size": "small/large",
+          "should_crop": true/false
         }
         """
         
@@ -166,10 +170,11 @@ class OCRService:
         """Final processing: Uses AI-detected bounding box (if available) to crop and enhance the image for the PDF."""
         try:
             bbox = metadata.get("bounding_box")
+            should_crop = metadata.get("should_crop", True) # Default to true for safety
             img = Image.open(io.BytesIO(image_bytes))
             
             # 1. Semantic Crop (AI Pass 1 Result)
-            if bbox and len(bbox) == 4:
+            if should_crop and bbox and len(bbox) == 4:
                 w, h = img.size
                 ymin, xmin, ymax, xmax = bbox
                 
