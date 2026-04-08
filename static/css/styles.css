@@ -571,9 +571,10 @@ textarea:focus {
 .danger-btn {
     width: 100%;
     padding: 1rem;
-    background: #fff1f1;
-    color: #a4262c;
-    border: 1px solid #fde7e9;
+    background: var(--shadow-lg); /* Darker base */
+    background: linear-gradient(135deg, #e03131, #c92a2a);
+    color: white;
+    border: none;
     border-radius: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -581,7 +582,8 @@ textarea:focus {
 }
 
 .danger-btn:hover {
-    background: #fde7e9;
+    opacity: 0.9;
+    transform: translateY(-1px);
 }
 
 /* --- Modals (The 'Windows' you mentioned) --- */
@@ -623,17 +625,18 @@ textarea:focus {
 
 /* Ensure symmetric padding for modal content */
 .modal-content {
-    background: var(--card-bg);
+    background: var(--card-bg) !important; /* Force solid background to avoid transparency */
     width: 100%;
     max-width: 600px;
-    border-radius: 30px 30px 0 0;
-    padding: 2.2rem 1.8rem; /* Increased and balanced */
-    max-height: 92vh;
+    border-radius: 28px !important; /* Force rounded corners everywhere */
+    padding: 2.2rem 1.8rem;
+    max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+    box-shadow: var(--shadow-lg);
     animation: fluentSlideUp 0.4s cubic-bezier(0, 0.55, 0.45, 1);
     position: relative;
     box-sizing: border-box;
+    border: 1px solid var(--border); /* Subtle border for definition */
 }
 
 @keyframes fluentSlideUp {
@@ -823,11 +826,14 @@ textarea:focus {
     border-radius: 0 !important;
     background: transparent !important;
     border: none !important;
+    word-break: break-word; /* Prevent overflow */
 }
 
 .field-value {
     font-size: 1rem;
     font-weight: 600;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 /* Preview Grid */
@@ -1056,7 +1062,7 @@ textarea:focus {
     align-items: center;
     gap: 12px;
     padding: 0.6rem var(--page-gutter);
-    background: #fdfdfd;
+    background: var(--app-bg);
     border-bottom: 1px solid var(--border);
     transition: all 0.3s ease;
 }
@@ -1067,8 +1073,8 @@ textarea:focus {
 }
 
 .nav-btn {
-    background: #f3f2f1;
-    border: none;
+    background: var(--bg-light);
+    border: 1px solid var(--border);
     width: 28px;
     height: 28px;
     border-radius: 50%;
@@ -1083,7 +1089,7 @@ textarea:focus {
 }
 
 .nav-btn:active {
-    background: #e1dfdd;
+    background: var(--border);
     transform: scale(0.9);
 }
 
@@ -1124,7 +1130,7 @@ textarea:focus {
     bottom: 0;
     left: 0;
     width: 100%;
-    background: #ffffff;
+    background: var(--app-bg);
     padding: 1rem 1.5rem;
     box-shadow: 0 -8px 25px rgba(0,0,0,0.15);
     z-index: 2000;
@@ -1168,7 +1174,7 @@ textarea:focus {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--modal-overlay);
     backdrop-filter: blur(8px);
     display: flex;
     flex-direction: column;
@@ -1294,7 +1300,7 @@ textarea:focus {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: var(--card-bg);
+    background: var(--bg-light);
     border: 1px solid var(--border);
     display: flex;
     align-items: center;
@@ -1378,4 +1384,52 @@ textarea:focus {
 
 .share-step.hidden {
     display: none;
+}
+
+/* --- Overhaul Correction: Centered Modals & Standard Lists --- */
+.vertical-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 1.5rem;
+}
+
+.vertical-actions button {
+    width: 100%;
+    justify-content: center;
+    border-radius: 16px;
+}
+
+#image-preview-container img {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease;
+}
+
+#image-preview-container img:hover {
+    transform: scale(1.02);
+}
+
+.actions button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+}
+
+/* Native Image Viewer Animations */
+#full-image-viewer.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.9) translateY(20px);
+}
+
+#full-image-viewer {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1) translateY(0);
+    transition: all 0.4s cubic-bezier(0.1, 0.7, 0.1, 1);
+    display: flex !important; /* Ensure it overrides display:none from modal.hidden */
 }

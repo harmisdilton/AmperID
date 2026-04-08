@@ -46,19 +46,55 @@ const finalizeMoveBtn = document.getElementById('finalize-move-btn');
 const cancelMoveBtn = document.getElementById('cancel-move-btn');
 const profileTextEl = document.getElementById('user-profile-text');
 
+// New Modals & Elements
+const shareChoiceModal = document.getElementById('share-choice-modal');
+const downloadChoiceModal = document.getElementById('download-choice-modal');
+const fullImageViewer = document.getElementById('full-image-viewer');
+const viewerImg = document.getElementById('viewer-img');
+
+const openShareChoiceBtn = document.getElementById('open-share-choice');
+const openDownloadChoiceBtn = document.getElementById('open-download-choice');
+const detailImage = document.getElementById('detail-image');
+
 // State
 let searchTerm = "";
-let currentView = "all"; 
-let currentFolderId = null; 
+let currentView = "all";
+let currentFolderId = null;
+let currentDetailDocId = null;
 let newlyCreatedFolderId = null;
-let movingDocId = null; 
+let currentSearchMode = "db";
+let movingDocId = null;
 let isAiSearchMode = false;
-let aiRelevantIds = null; // List of IDs returned by AI Search
-
-// Navigation
+let aiRelevantIds = null;
 let folderBackStack = [];
 let folderForwardStack = [];
 
+// --- Utilities ---
+function copyToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+    } else {
+        // Fallback for non-secure contexts or older browsers
+        return new Promise((resolve, reject) => {
+            try {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                textArea.style.top = "0";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                if (successful) resolve();
+                else reject(new Error('Copy command failed'));
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+}
 // --- Translation ---
 const translations = {
     hy: {
@@ -66,8 +102,8 @@ const translations = {
         tab_all: "Բոլոր փաստաթղթերը",
         tab_folders: "Թղթապանակներ",
         nav_path_root: "Թղթապանակներ",
-        ctx_move: "📁 Ավելացնել թղթապանակում",
-        ctx_delete: "🗑️ Ջնջել",
+        ctx_move: "Ավելացնել թղթապանակում",
+        ctx_delete: "Ջնջել",
         ctx_cancel: "Չեղարկել",
         move_save: "Պահպանել այստեղ",
         move_cancel: "Չեղարկել",
@@ -91,12 +127,16 @@ const translations = {
         save_changes: "Պահպանել փոփոխությունները",
         download_pdf: "Ներբեռնել PDF",
         share_pdf: "Ուղարկել PDF",
+        share_doc: "Ուղարկել AmperID փաստաթուղթ",
+        share_qr_desc: "Ցույց տվեք այս QR կոդը կամ ուղարկեք հղումը:",
+        security_num_label: "Անվտանգության թիվ",
+        security_num_desc: "Խնդրեք ստացողին ընտրել այս թիվը փաստաթղթի էջի տարբերակներից:",
         delete: "Ջնջել",
         delete_options: "Ջնջելու տարբերակներ",
         delete_description: "Ինչպե՞ս եք ցանկանում վարվել այս փաստաթղթի հետ?",
         rm_from_folder: "Հեռացնել միայն թղթապանակից",
         delete_completely: "Ջնջել ամբողջությամբ",
-        ai_suggest: "ԻԻ Առաջարկ ✨",
+        ai_suggest: "ԻԻ Առաջարկ",
         ai_suggest_desc: "ԻԻ-ն համարում է, որ այս փաստաթղթի համար լավագույն տեղն է՝",
         ai_suggest_confirm: "Ցանկանո՞ւմ եք անմիջապես տեղափոխել այնտեղ?",
         yes_move: "Այո, տեղափոխել",
@@ -106,7 +146,7 @@ const translations = {
         ai_no_match: "Համապատասխան փաստաթուղթ չի գտնվել:",
         lock_screen_title: "Մուտքագրեք PIN կոդը",
         unlock_btn: "Բացել",
-        security_title: "🔒 Անվտանգություն",
+        security_title: "Անվտանգություն",
         security_info: "Սահմանեք 4-նիշանոց PIN կոդ՝ ձեր անձնական փաստաթղթերը պաշտպանելու համար:",
         set_pin: "Սահմանել PIN կոդ",
         remove_pin: "Հեռացնել PIN կոդը",
@@ -114,6 +154,8 @@ const translations = {
         pin_success: "PIN կոդը հաջողությամբ սահմանվեց",
         pin_mismatch: "Սխալ PIN կոդ",
         pin_removed: "PIN կոդը հեռացվեց",
+        generating_link: "Հղումը ստեղծվում է...",
+        error_creating_link: "Հղումը ստեղծելիս սխալ տեղի ունեցավ:",
         reset_all_data: "Ջնջել բոլոր տվյալները",
         processing_pages: "Ուղարկում է {n} էջ...",
         ai_processing: "ԻԻ-ն սկանավորում և կտրում է... (սպասեք 10-20 վրկ)",
@@ -138,15 +180,25 @@ const translations = {
         privacy_policy_btn: "Գաղտնիության քաղաքականություն",
         privacy_policy_title: "Գաղտնիության քաղաքականություն",
         privacy_policy_text: "AmperID-ն առաջնահերթություն է տալիս ձեր գաղտնիությանը: Բոլոր ձեր փաստաթղթերը և տվյալները պահպանվում են բացառապես ձեր սարքի վրա (Local Storage): Մենք չունենք սերվերային տվյալների բազա ձեր անձնական տվյալների համար: AI-ի մշակման ժամանակ պատկերները ուղարկվում են միայն վերլուծության համար և չեն պահպանվում սերվերում: Դուք ցանկացած պահի կարող եք ջնջել բոլոր տվյալները «Ջնջել բոլոր տվյալները» կոճակի միջոցով:",
-        flag: "🇦🇲"
+        flag: "🇦🇲",
+        share: "Կիսվել",
+        download: "Ներբեռնել",
+        share_options: "Կիսվել...",
+        download_options: "Ներբեռնել...",
+        opt_photo: "Ֆոտո",
+        opt_pdf: "PDF",
+        opt_link: "AmperID Հղում",
+        click_full_view: "Սեղմեք լիաէկրան դիտման համար",
+        min: "րոպե",
+        hour: "ժամ"
     },
     ru: {
         search_placeholder: "Поиск документов...",
         tab_all: "Все документы",
         tab_folders: "Папки",
         nav_path_root: "Папки",
-        ctx_move: "📁 Добавить в папку",
-        ctx_delete: "🗑️ Удалить",
+        ctx_move: "Добавить в папку",
+        ctx_delete: "Удалить",
         ctx_cancel: "Отмена",
         move_save: "Сохранить здесь",
         move_cancel: "Отмена",
@@ -170,12 +222,16 @@ const translations = {
         save_changes: "Сохранить изменения",
         download_pdf: "Скачать PDF",
         share_pdf: "Отправить PDF",
+        share_doc: "Отправить AmperID документ",
+        share_qr_desc: "Покажите этот QR-код или отправьте ссылку:",
+        security_num_label: "Код безопасности",
+        security_num_desc: "Попросите получателя выбрать это число из вариантов на странице документа.",
         delete: "Удалить",
         delete_options: "Варианты удаления",
         delete_description: "Как вы хотите поступить с этим документом?",
         rm_from_folder: "Удалить только из папки",
         delete_completely: "Удалить полностью",
-        ai_suggest: "Предложение ИИ ✨",
+        ai_suggest: "Предложение ИИ",
         ai_suggest_desc: "ИИ считает, что лучшее место для этого документа:",
         ai_suggest_confirm: "Хотите переместить его туда?",
         yes_move: "Да, переместить",
@@ -185,7 +241,7 @@ const translations = {
         ai_no_match: "Совпадений не найдено.",
         lock_screen_title: "Введите PIN-код",
         unlock_btn: "Открыть",
-        security_title: "🔒 Безопасность",
+        security_title: "Безопасность",
         security_info: "Установите 4-значный PIN-код для защиты ваших документов от посторонних.",
         set_pin: "Установить PIN-код",
         remove_pin: "Удалить PIN-код",
@@ -193,6 +249,8 @@ const translations = {
         pin_success: "PIN-код успешно установлен",
         pin_mismatch: "Неверный PIN-код",
         pin_removed: "PIN-код удален",
+        generating_link: "Генерация ссылки...",
+        error_creating_link: "Ошибка при создании ссылки.",
         reset_all_data: "Сбросить все данные",
         processing_pages: "Отправка {n} стр...",
         ai_processing: "ИИ сканирует... (жди 10-20 сек)",
@@ -217,15 +275,25 @@ const translations = {
         privacy_policy_btn: "Политика конфиденциальности",
         privacy_policy_title: "Политика конфиденциальности",
         privacy_policy_text: "AmperID уделяет первостепенное внимание вашей конфиденциальности. Все ваши документы и данные хранятся исключительно на вашем устройстве (Локальное хранилище). У нас нет серверной базы данных для ваших личных данных. При обработке ИИ изображения отправляются только для анализа и не сохраняются на сервере. Вы можете в любой момент удалить все свои данные с помощью кнопки «Удалить все данные».",
-        flag: "🇷🇺"
+        flag: "🇷🇺",
+        share: "Поделиться",
+        download: "Скачать",
+        share_options: "Поделиться...",
+        download_options: "Скачать как...",
+        opt_photo: "Фото",
+        opt_pdf: "PDF Документ",
+        opt_link: "Ссылка AmperID",
+        click_full_view: "Нажмите для полноэкранного просмотра",
+        min: "мин",
+        hour: "час"
     },
     en: {
         search_placeholder: "Search documents...",
         tab_all: "All Documents",
         tab_folders: "Folders",
         nav_path_root: "Folders",
-        ctx_move: "📁 Add to folder",
-        ctx_delete: "🗑️ Delete",
+        ctx_move: "Add to folder",
+        ctx_delete: "Delete",
         ctx_cancel: "Cancel",
         move_save: "Save here",
         move_cancel: "Cancel",
@@ -248,13 +316,19 @@ const translations = {
         copy_data: "Copy Data",
         save_changes: "Save Changes",
         download_pdf: "Download PDF",
-        share_pdf: "Send PDF",
+        share_pdf: "Share PDF",
+        share_doc: "Share AmperID Document",
+        share_qr_desc: "Show this QR code or send the link:",
+        security_num_label: "Security Number",
+        security_num_desc: "Ask the recipient to select this number from the options on the document page.",
         delete: "Delete",
         delete_options: "Delete Options",
         delete_description: "How would you like to handle this document?",
         rm_from_folder: "Remove from folder only",
         delete_completely: "Delete completely",
-        ai_suggest: "AI Suggestion ✨",
+        generating_link: "Generating link...",
+        error_creating_link: "Error creating link.",
+        ai_suggest: "AI Suggestion",
         ai_suggest_desc: "AI thinks the best place for this is:",
         ai_suggest_confirm: "Would you like to move it there now?",
         yes_move: "Yes, move it",
@@ -264,7 +338,7 @@ const translations = {
         ai_no_match: "No matching documents found.",
         lock_screen_title: "Enter PIN Code",
         unlock_btn: "Unlock",
-        security_title: "🔒 Security",
+        security_title: "Security",
         security_info: "Set a 4-digit PIN to protect your personal documents from unauthorized access.",
         set_pin: "Set PIN Code",
         remove_pin: "Remove PIN Code",
@@ -296,7 +370,17 @@ const translations = {
         privacy_policy_btn: "Privacy Policy",
         privacy_policy_title: "Privacy Policy",
         privacy_policy_text: "AmperID prioritizes your privacy. All your documents and data are stored exclusively on your device (Local Storage). We do not have a server-side database for your personal data. During AI processing, images are sent only for analysis and are not stored on the server. You can delete all your data at any time via the 'Reset All Data' button.",
-        flag: "🇺🇸"
+        flag: "🇺🇸",
+        share: "Share",
+        download: "Download",
+        share_options: "Share via...",
+        download_options: "Download as...",
+        opt_photo: "Photo",
+        opt_pdf: "PDF Document",
+        opt_link: "AmperID Link",
+        click_full_view: "Click for full screen view",
+        min: "min",
+        hour: "hour"
     }
 };
 
@@ -509,80 +593,9 @@ function initLangSwitcher() {
 function setLanguage(lang) {
     currentLang = lang;
     localStorage.setItem('amp_lang', lang);
-    document.getElementById('current-lang-flag').innerText = translations[lang].flag;
     updateStaticTranslations();
     renderDocuments();
 }
-
-function updateStaticTranslations() {
-    // Basic elements
-    document.getElementById('search-input').placeholder = t('search_placeholder');
-    document.getElementById('tab-all').innerText = t('tab_all');
-    document.getElementById('tab-folders').innerText = t('tab_folders');
-    document.getElementById('loader-status').innerText = t('loader_default');
-    
-    // Modals
-    document.querySelector('#user-menu-modal h2').innerText = t('account_title');
-    document.getElementById('show-profile-btn').innerText = t('show_profile');
-    document.getElementById('show-privacy-btn').innerText = t('privacy_policy_btn');
-    document.getElementById('reset-all-data-btn').innerText = t('reset_data');
-
-    document.getElementById('profile-title-text').innerText = t('about_me_title');
-    document.getElementById('profile-disclaimer').innerText = t('about_me_disclaimer');
-    document.getElementById('close-profile-btn').innerText = t('close');
-
-    document.getElementById('privacy-title-text').innerText = t('privacy_policy_title');
-    document.getElementById('close-privacy-btn').innerText = t('close');
-    
-    document.querySelector('#upload-modal h2').innerText = t('new_doc_title');
-    document.querySelector('.camera-btn:not(.secondary)').firstChild.textContent = t('capture_btn') + " ";
-    document.querySelector('.camera-btn.secondary').firstChild.textContent = t('gallery_btn') + " ";
-    document.getElementById('process-batch-btn').innerText = t('save_doc');
-    document.getElementById('close-modal').innerText = t('cancel');
-    
-    document.getElementById('show-add-field').innerText = t('add_field_btn');
-    document.getElementById('copy-doc-data').innerText = t('copy_data');
-    document.getElementById('save-doc-changes').innerText = t('save_changes');
-    document.getElementById('download-pdf').innerText = t('download_pdf');
-    document.getElementById('share-pdf').innerText = t('share_pdf');
-    document.getElementById('delete-doc').innerText = t('delete');
-    
-    document.querySelector('#delete-choice-modal h2').innerText = t('delete_options');
-    document.querySelector('#delete-choice-modal p').innerText = t('delete_description');
-    document.getElementById('remove-from-folder-btn').innerText = t('rm_from_folder');
-    document.getElementById('delete-completely-btn').innerText = t('delete_completely');
-    document.getElementById('cancel-delete-btn').innerText = t('cancel');
-    
-    document.querySelector('#smart-suggest-modal h2').innerText = t('ai_suggest');
-    document.querySelector('#smart-suggest-modal p:nth-of-type(1)').firstChild.textContent = t('ai_suggest_desc') + " ";
-    document.querySelector('#smart-suggest-modal p:nth-of-type(2)').innerText = t('ai_suggest_confirm');
-    document.getElementById('confirm-smart-move-btn').innerText = t('yes_move');
-    document.getElementById('reject-smart-move-btn').innerText = t('no_stay');
-    
-    // Context Menu
-    document.getElementById('ctx-move-btn').innerText = t('ctx_move');
-    document.getElementById('ctx-delete-btn').innerText = t('ctx_delete');
-    document.getElementById('close-ctx-menu').innerText = t('ctx_cancel');
-
-    // Move Bar
-    document.getElementById('finalize-move-btn').innerText = t('move_save');
-    document.getElementById('cancel-move-btn').innerText = t('move_cancel');
-    
-    // Detail Modal Placeholders
-    document.getElementById('new-field-key').placeholder = t('field_name_label');
-    document.getElementById('new-field-val').placeholder = t('field_val_label');
-}
-
-// --- Initialization ---
-
-window.onload = () => {
-    initLangSwitcher();
-    updateStaticTranslations();
-    initTabs();
-    initFolderNav();
-    initContextUI();
-    renderDocuments();
-};
 
 function initFolderNav() {
     document.getElementById('nav-back').onclick = goFolderBack;
@@ -1044,7 +1057,7 @@ async function renderFolderCard(folder) {
     
     // Set all HTML at ONCE to avoid destroying listeners later
     card.innerHTML = `
-        <script src="/static/js/app.js?v=102"></script>
+        <div class="folder-icon">📁</div>
         ${isNew ? `<input type="text" value="${folder.name}" class="folder-title-input">` : `<div class="folder-name">${folder.name}</div>`}
         <div class="card-date">${dateStr}</div>
     `;
@@ -1165,13 +1178,89 @@ async function openDetail(id) {
         alert(t('saved_msg'));
         renderDocuments();
     };
-    document.getElementById('detail-share-btn').onclick = () => {
-        openShareModal(id);
-    };
-    document.getElementById('download-pdf').onclick = () => { 
-        const a = document.createElement('a'); a.href = doc.pdf_data; 
-        a.download = `${doc.title}.pdf`; a.click(); 
-    };
+
+    // Copy Data Button logic
+    const copyDataBtn = document.getElementById('copy-doc-data');
+    if (copyDataBtn) {
+        copyDataBtn.onclick = () => {
+            let copyStr = `${document.getElementById('edit-doc-title').value.trim()}\n\n`;
+            // Grab LIVE values from inputs in case user edited them
+            document.querySelectorAll('.edit-field-val').forEach(input => {
+                const key = input.dataset.key;
+                const val = input.value.trim();
+                copyStr += `${key}: ${val}\n`;
+            });
+
+            copyToClipboard(copyStr).then(() => {
+                const originalText = copyDataBtn.innerText;
+                copyDataBtn.innerText = '✅ ' + t('copy_data');
+                setTimeout(() => copyDataBtn.innerText = originalText, 2000);
+            }).catch(err => {
+                console.error("Copy failed", err);
+                alert("Copy failed. Please try manual copy.");
+            });
+        };
+    }
+
+    // Add Field Box Logic
+    const addFieldBox = document.getElementById('add-field-box');
+    const showAddFieldBtn = document.getElementById('show-add-field');
+    const saveNewFieldBtn = document.getElementById('save-new-field');
+    const cancelNewFieldBtn = document.getElementById('cancel-new-field');
+
+    if (showAddFieldBtn) {
+        showAddFieldBtn.onclick = () => {
+            addFieldBox.classList.toggle('hidden');
+        };
+    }
+
+    if (cancelNewFieldBtn) {
+        cancelNewFieldBtn.onclick = () => {
+            addFieldBox.classList.add('hidden');
+            document.getElementById('new-field-key').value = '';
+            document.getElementById('new-field-val').value = '';
+        };
+    }
+
+    if (saveNewFieldBtn) {
+        saveNewFieldBtn.onclick = async () => {
+            const key = document.getElementById('new-field-key').value.trim();
+            const val = document.getElementById('new-field-val').value.trim();
+            if (!key || !val) {
+                alert("Please fill both fields");
+                return;
+            }
+
+            const updatedFields = doc.fields_json || {};
+            // Append to current language data
+            if (updatedFields[currentLang]) {
+                updatedFields[currentLang].data[key] = val;
+            } else if (updatedFields.տվյալներ) {
+                // Legacy support
+                updatedFields.տվյալներ[key] = val;
+            } else {
+                // Fresh start or flat object
+                if (!updatedFields[currentLang]) updatedFields[currentLang] = { title: displayTitle, data: {} };
+                updatedFields[currentLang].data[key] = val;
+            }
+
+            await db.documents.update(id, { fields_json: updatedFields });
+            document.getElementById('new-field-key').value = '';
+            document.getElementById('new-field-val').value = '';
+            addFieldBox.classList.add('hidden');
+            
+            // Reload the detail view to show new field
+            openDetail(id);
+        };
+    }
+
+    // New Choice Modal Triggers
+    openShareChoiceBtn.onclick = () => openShareChoice(id);
+    openDownloadChoiceBtn.onclick = () => openDownloadChoice(id);
+    
+    // Image Click -> Full Screen
+    detailImage.onclick = () => openImageViewer(doc.thumbnail_data);
+    
     document.getElementById('delete-doc').onclick = async () => {
         // Strict check to ensure we catch all folder-bound documents
         if (doc.folder_id !== null && doc.folder_id !== undefined) {
@@ -1422,12 +1511,6 @@ scrollToTopBtn.onclick = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// Initial state
-initTheme();
-initSecurity();
-renderDocuments();
-// updateStaticTranslations(); // Initial translation update
-
 const themeCheckbox = document.getElementById('checkbox');
 if (themeCheckbox) {
     themeCheckbox.onchange = toggleTheme;
@@ -1517,7 +1600,7 @@ function closeShareModal() {
 async function shareDocument(docId, minutes) {
     const btnBox = document.querySelector('#share-step-time .vertical-actions');
     const originalContent = btnBox.innerHTML;
-    btnBox.innerHTML = `<div class="loader-small"></div><p style="text-align:center;">Генерация ссылки...</p>`;
+    btnBox.innerHTML = `<div class="loader-small"></div><p style="text-align:center;">${t('generating_link')}</p>`;
 
     try {
         const doc = await db.documents.get(docId);
@@ -1538,7 +1621,7 @@ async function shareDocument(docId, minutes) {
             const data = await response.json();
             showShareResult(data);
         } else {
-            alert("Ошибка при создании ссылки.");
+            alert(t('error_creating_link'));
             btnBox.innerHTML = originalContent;
             initShareModalListeners();
         }
@@ -1557,6 +1640,12 @@ function initShareModalListeners() {
             if (currentSharingDocId) shareDocument(currentSharingDocId, mins);
         };
     });
+
+    const closeBtn = document.getElementById('close-share-btn');
+    if (closeBtn) closeBtn.onclick = closeShareModal;
+    
+    const cancelBtn = document.getElementById('cancel-share-btn');
+    if (cancelBtn) cancelBtn.onclick = closeShareModal;
 }
 
 function showShareResult(data) {
@@ -1573,7 +1662,7 @@ function showShareResult(data) {
         text: shareUrl,
         width: 160,
         height: 160,
-        colorDark : "#0078d4",
+        colorDark : "#000000",
         colorLight : "#ffffff",
         correctLevel : QRCode.CorrectLevel.H
     });
@@ -1586,7 +1675,7 @@ function copyShareUrl() {
     const copyBtn = document.getElementById('copy-share-url-btn');
     const original = copyBtn.innerText;
     copyBtn.innerText = '✅';
-    setTimeout(() => copyBtn.innerText = original, 2000);
+    setTimeout(() => copyBtn.innerText = original || '🔗', 2000);
 }
 
 // AI Response Copy logic
@@ -1594,7 +1683,7 @@ const aiCopyBtn = document.getElementById('ai-copy-btn');
 if (aiCopyBtn) {
     aiCopyBtn.onclick = () => {
         const textToCopy = document.getElementById('ai-response-text').innerText;
-        navigator.clipboard.writeText(textToCopy).then(() => {
+        copyToClipboard(textToCopy).then(() => {
             const original = aiCopyBtn.innerText;
             aiCopyBtn.innerText = '✅';
             setTimeout(() => aiCopyBtn.innerText = original, 2000);
@@ -1602,11 +1691,178 @@ if (aiCopyBtn) {
     };
 }
 
-initShareModalListeners();
+function updateStaticTranslations() {
+    const tKeys = translations[currentLang];
+    
+    // 1. Universal data-t translation loop
+    document.querySelectorAll('[data-t]').forEach(el => {
+        const key = el.getAttribute('data-t');
+        const translatedContent = t(key);
+        
+        if (translatedContent && translatedContent !== key) {
+            if (el.tagName === 'INPUT' && el.hasAttribute('placeholder')) {
+                el.placeholder = translatedContent;
+            } else {
+                el.innerText = translatedContent;
+            }
+        }
+    });
 
-// Final Initialization
-initTheme();
-initSecurity();
-initLangSwitcher();
-updateStaticTranslations();
-renderDocuments();
+    const loaderStatus = document.getElementById('loader-status');
+    if (loaderStatus) loaderStatus.innerText = t('loader_default');
+    
+    const flagEl = document.getElementById('current-lang-flag');
+    if (flagEl) flagEl.innerText = tKeys.flag;
+}
+
+// --- New Feature Handlers (Share, Download, View) ---
+
+function openShareChoice(id) {
+    currentDetailDocId = id;
+    const modal = document.getElementById('share-choice-modal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function openDownloadChoice(id) {
+    currentDetailDocId = id;
+    const modal = document.getElementById('download-choice-modal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function openImageViewer(src) {
+    if (!src) return;
+    const viewer = document.getElementById('full-image-viewer');
+    const img = document.getElementById('viewer-img');
+    if (viewer && img) {
+        img.src = src;
+        viewer.classList.remove('hidden');
+    }
+}
+
+async function invokeSharer(type) {
+    const doc = await db.documents.get(currentDetailDocId);
+    if (!doc) return;
+
+    document.getElementById('share-choice-modal').classList.add('hidden');
+    
+    if (type === 'link') {
+        openShareModal(doc.id);
+        return;
+    }
+
+    try {
+        const safeTitle = (doc.title || "document").replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        const extension = type === 'pdf' ? 'pdf' : 'jpg';
+        const mime = type === 'pdf' ? 'application/pdf' : 'image/jpeg';
+        const dataUrl = type === 'pdf' ? doc.pdf_data : doc.thumbnail_data;
+        
+        if (!dataUrl) {
+            alert("No data available to share");
+            return;
+        }
+
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        const file = new File([blob], `${safeTitle}.${extension}`, { type: mime });
+
+        // Check for Web Share API support
+        if (navigator.share) {
+            // Check if specifically file sharing is supported
+            const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
+            
+            if (canShareFiles) {
+                await navigator.share({
+                    files: [file],
+                    title: doc.title || "AmperID Document",
+                    text: `Shared document from AmperID`
+                });
+            } else {
+                // If can't share files but can share text/url, try that or notify
+                console.warn("File sharing not supported by this browser. Falling back to download.");
+                alert("Native file sharing is not supported by your browser. Downloading the file instead.");
+                invokeDownloader(type);
+            }
+        } else {
+            console.warn("Web Share API not available. Falling back to download.");
+            alert("Sharing is not available on this browser. Downloading the file instead.");
+            invokeDownloader(type);
+        }
+    } catch (err) {
+        console.error("Sharing failed", err);
+        // If it's a PermissionDenied or similar, don't necessarily download unless intended
+        if (err.name !== 'AbortError') {
+            invokeDownloader(type);
+        }
+    }
+}
+
+async function invokeDownloader(type) {
+    const doc = await db.documents.get(currentDetailDocId);
+    if (!doc) return;
+
+    document.getElementById('download-choice-modal').classList.add('hidden');
+    const dataUrl = type === 'pdf' ? doc.pdf_data : doc.thumbnail_data;
+    const extension = type === 'pdf' ? 'pdf' : 'jpg';
+
+    if (!dataUrl) {
+        alert("No data available to download");
+        return;
+    }
+
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = `${doc.title}.${extension}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+// Final Initialization Consolidation
+window.onload = () => {
+    initTheme();
+    initSecurity();
+    initLangSwitcher();
+    updateStaticTranslations();
+    initTabs();
+    initFolderNav();
+    initContextUI();
+    initShareModalListeners();
+    renderDocuments();
+};
+
+// Global Event Listeners for Choice Modals
+const closeShareChoice = document.getElementById('close-share-choice');
+const cancelShareChoice = document.getElementById('cancel-share-choice');
+if (closeShareChoice) closeShareChoice.onclick = () => document.getElementById('share-choice-modal').classList.add('hidden');
+if (cancelShareChoice) cancelShareChoice.onclick = () => document.getElementById('share-choice-modal').classList.add('hidden');
+
+const closeDownloadChoice = document.getElementById('close-download-choice');
+const cancelDownloadChoice = document.getElementById('cancel-download-choice');
+if (closeDownloadChoice) closeDownloadChoice.onclick = () => document.getElementById('download-choice-modal').classList.add('hidden');
+if (cancelDownloadChoice) cancelDownloadChoice.onclick = () => document.getElementById('download-choice-modal').classList.add('hidden');
+
+const closeViewer = document.getElementById('close-viewer');
+if (closeViewer) closeViewer.onclick = () => document.getElementById('full-image-viewer').classList.add('hidden');
+
+// Action Listeners
+document.getElementById('share-opt-photo').onclick = () => invokeSharer('photo');
+document.getElementById('share-opt-pdf').onclick = () => invokeSharer('pdf');
+document.getElementById('share-opt-link').onclick = () => invokeSharer('link');
+
+document.getElementById('download-opt-photo').onclick = () => invokeDownloader('photo');
+document.getElementById('download-opt-pdf').onclick = () => invokeDownloader('pdf');
+
+// Copy Share URL
+const copyUrlBtn = document.getElementById('copy-share-url-btn');
+if (copyUrlBtn) {
+    copyUrlBtn.onclick = () => {
+        const urlInput = document.getElementById('share-url');
+        if (urlInput) {
+            copyToClipboard(urlInput.value).then(() => {
+                const original = copyUrlBtn.innerText;
+                copyUrlBtn.innerText = '✅';
+                setTimeout(() => copyUrlBtn.innerText = original || '🔗', 2000);
+            });
+        }
+    };
+}

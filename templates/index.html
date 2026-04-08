@@ -5,14 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ArmperID - Իմ փաստաթղթերը</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v=86">
+    <link rel="stylesheet" href="/static/css/styles.css?v=110">
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
 </head>
 
 <body class="light-theme">
     <div id="lock-screen" class="hidden">
         <div class="lock-logo">💠</div>
-        <div class="lock-title" id="lock-screen-title">Unlock AmperID</div>
+        <div class="lock-title" id="lock-screen-title" data-t="lock_screen_title">Unlock AmperID</div>
         <div class="pin-dots">
             <div class="pin-dot"></div>
             <div class="pin-dot"></div>
@@ -29,7 +29,7 @@
             <div class="pin-key" data-val="7">7</div>
             <div class="pin-key" data-val="8">8</div>
             <div class="pin-key" data-val="9">9</div>
-            <div class="pin-key action" id="pin-bio-trigger">🧬</div>
+            <div class="pin-key action" id="pin-bio-trigger">BIO</div>
             <div class="pin-key" data-val="0">0</div>
             <div class="pin-key action" id="pin-delete">⌫</div>
         </div>
@@ -38,7 +38,7 @@
     <div id="app" class="app-hidden">
         <div id="loader" class="loader-container hidden">
             <div class="spinner"></div>
-            <p id="loader-status">Մշակվում է...</p>
+            <p id="loader-status" data-t="loader_default">Processing...</p>
         </div>
 
         <header class="fluent-header">
@@ -49,7 +49,7 @@
                 </div>
                 <!-- Theme Toggle & Lock -->
                 <div class="header-actions" style="margin-left: auto; margin-right: 15px;">
-                    <button id="manual-lock-btn" class="icon-btn" title="Lock App">🔒</button>
+                    <button id="manual-lock-btn" class="icon-btn" title="Lock App"></button>
                     <div class="theme-switch-wrapper">
                         <label class="theme-switch" for="checkbox">
                             <input type="checkbox" id="checkbox" />
@@ -74,7 +74,7 @@
 
         <div class="controls-container">
             <div class="search-container">
-                <input type="text" id="search-input" placeholder="Փնտրել փաստաթուղթ...">
+                <input type="text" id="search-input" data-t="search_placeholder" placeholder="Search...">
                 <button id="ai-search-toggle" class="ai-toggle-btn" title="AI Assistant">AI</button>
             </div>
             
@@ -82,7 +82,7 @@
             <div id="ai-response-container" class="ai-response-panel hidden">
                 <div class="ai-panel-header">
                     <span class="ai-badge">AmperAI</span>
-                    <button id="ai-copy-btn" class="ai-copy-btn" title="Copy Response">📋</button>
+                    <button id="ai-copy-btn" class="ai-copy-btn" title="Copy Response"></button>
                 </div>
                 <div class="ai-panel-content">
                     <div id="ai-response-text" class="ai-text">...</div>
@@ -90,18 +90,18 @@
             </div>
 
             <nav class="view-tabs">
-                <button id="tab-all" class="tab-btn active">Բոլոր փաստաթղթերը</button>
+                <button id="tab-all" class="tab-btn active" data-t="tab_all">All Documents</button>
                 <div class="tab-divider"></div>
-                <button id="tab-folders" class="tab-btn">Թղթապանակներ</button>
+                <button id="tab-folders" class="tab-btn" data-t="tab_folders">Folders</button>
             </nav>
 
             <!-- Folder Navigation Bar (Hidden by default) -->
             <div id="folder-nav-bar" class="folder-nav-bar hidden">
                 <div class="nav-controls">
-                    <button id="nav-back" class="nav-btn" title="Հետ">&lt;</button>
-                    <button id="nav-forward" class="nav-btn" title="Առաջ">&gt;</button>
+                    <button id="nav-back" class="nav-btn" title="Back">&lt;</button>
+                    <button id="nav-forward" class="nav-btn" title="Forward">&gt;</button>
                 </div>
-                <div id="nav-path" class="nav-path">Թղթապանակներ</div>
+                <div id="nav-path" class="nav-path" data-t="nav_path_root">Folders</div>
             </div>
         </div>
 
@@ -126,10 +126,10 @@
         <div id="context-menu-modal" class="modal hidden">
             <div class="modal-content bottom-sheet">
                 <div class="menu-actions">
-                    <button id="ctx-share-btn" class="primary-btn">🔗 Поделиться (Timer)</button>
-                    <button id="ctx-move-btn" class="primary-btn">📁 Ավելացնել թղթապանակում</button>
-                    <button id="ctx-delete-btn" class="danger-btn">🗑️ Ջնջել</button>
-                    <button id="close-ctx-menu" class="link-btn">Չեղարկել</button>
+                    <button id="ctx-share-btn" class="primary-btn"><span data-t="opt_link">Share Link</span></button>
+                    <button id="ctx-move-btn" class="primary-btn" data-t="ctx_move">Add to folder</button>
+                    <button id="ctx-delete-btn" class="danger-btn" data-t="ctx_delete">Delete</button>
+                    <button id="close-ctx-menu" class="link-btn" data-t="ctx_cancel">Cancel</button>
                 </div>
             </div>
         </div>
@@ -140,8 +140,8 @@
                 <span id="move-doc-name"></span>
             </div>
             <div class="move-buttons">
-                <button id="finalize-move-btn" class="primary-btn small">Պահպանել այստեղ</button>
-                <button id="cancel-move-btn" class="link-btn small">Չեղարկել</button>
+                <button id="finalize-move-btn" class="primary-btn small" data-t="move_save">Save here</button>
+                <button id="cancel-move-btn" class="link-btn small" data-t="move_cancel">Cancel</button>
             </div>
         </div>
 
@@ -149,26 +149,26 @@
         <div id="user-menu-modal" class="modal hidden">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Իմ հաշիվը</h2>
+                    <h2 data-t="account_title">My Account</h2>
                     <button id="close-user-menu" style="background:none; border:none; font-size:1.5rem;">×</button>
                 </div>
                 <div class="menu-actions">
-                    <button id="show-profile-btn" class="primary-btn" style="margin-bottom: 0.75rem;">
-                        Իմ մասին (AI)
+                    <button id="show-profile-btn" class="primary-btn" style="margin-bottom: 0.75rem;" data-t="show_profile">
+                        About Me (AI)
                     </button>
-                    <button id="show-privacy-btn" class="primary-btn" style="margin-bottom: 1rem; background-color: var(--accent-light); color: white; border: 1px solid var(--border-color);">
-                        Գաղտնիության քաղաքականություն
+                    <button id="show-privacy-btn" class="primary-btn" style="margin-bottom: 1rem; background-color: var(--accent-light); color: white; border: 1px solid var(--border-color);" data-t="privacy_policy_btn">
+                        Privacy Policy
                     </button>
-                    <button id="reset-all-data-btn" class="danger-btn">
-                        Ջնջել բոլոր տվյալները
+                    <button id="reset-all-data-btn" class="danger-btn" data-t="reset_data">
+                        Reset All Data
                     </button>
 
                     <div class="security-section">
-                        <h3 id="security-title" style="margin-bottom: 1rem; font-size: 1.1rem;">🔒 Fast Security</h3>
-                        <p class="security-info" id="security-info">Set a 4-digit PIN to protect your personal documents from unauthorized access.</p>
-                        <button id="set-pin-btn" class="link-btn">Set PIN Code</button>
-                        <button id="remove-pin-btn" class="danger-btn hidden">Remove PIN Code</button>
-                        <button id="biometric-btn" class="link-btn hidden">Enable Biometrics</button>
+                        <h3 id="security-title" style="margin-bottom: 1rem; font-size: 1.1rem;" data-t="security_title">Security</h3>
+                        <p class="security-info" id="security-info" data-t="security_info">Set a 4-digit PIN to protect your personal documents.</p>
+                        <button id="set-pin-btn" class="link-btn" data-t="set_pin">Set PIN Code</button>
+                        <button id="remove-pin-btn" class="danger-btn hidden" data-t="remove_pin">Remove PIN Code</button>
+                        <button id="biometric-btn" class="link-btn hidden" data-t="enable_bio">Enable Biometrics</button>
                     </div>
                 </div>
                 <p id="app-version" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem;">AmperID v1.0.92</p>
@@ -179,20 +179,20 @@
         <div id="profile-modal" class="modal hidden">
             <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
-                <h2 id="profile-title-text">Իմ մասին</h2>
+                <h2 id="profile-title-text" data-t="about_me_title">About Me</h2>
                 <button id="close-profile" style="background:none; border:none; font-size:1.5rem;">×</button>
             </div>
             <div id="user-profile-text" class="profile-text-container">
-                Պրոֆիլը բեռնվում է...
+                Loading...
             </div>
 
 
-                <button id="reset-all-btn" class="danger-btn" style="margin-top: 2rem;">Reset All Data</button>
-            <p id="profile-disclaimer" style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 1rem; font-style: italic;">
-                * Այս տեքստը ստեղծվել է AI-ի կողմից՝ հիմնվելով ձեր բոլոր փաստաթղթերի վրա:
+                <button id="reset-all-btn" class="danger-btn" style="margin-top: 2rem;" data-t="reset_all_data">Reset All Data</button>
+            <p id="profile-disclaimer" style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 1rem; font-style: italic;" data-t="about_me_disclaimer">
+                * This text is generated by AI based on your documents.
             </p>
             <div class="actions">
-                <button id="close-profile-btn" class="primary-btn">Փակել</button>
+                <button id="close-profile-btn" class="primary-btn" data-t="close">Close</button>
             </div>
         </div>
     </div>
@@ -201,14 +201,14 @@
     <div id="privacy-modal" class="modal hidden">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
-                <h2 id="privacy-title-text">Գաղտնիության քաղաքականություն</h2>
+                <h2 id="privacy-title-text" data-t="privacy_policy_title">Privacy Policy</h2>
                 <button id="close-privacy" style="background:none; border:none; font-size:1.5rem;">×</button>
             </div>
             <div id="privacy-text-content" class="profile-text-container" style="font-size: 0.9rem; line-height: 1.6; text-align: left; max-height: 60vh; overflow-y: auto;">
                 <!-- Content will be injected via JS -->
             </div>
             <div class="actions">
-                <button id="close-privacy-btn" class="primary-btn">Փակել</button>
+                <button id="close-privacy-btn" class="primary-btn" data-t="close">Close</button>
             </div>
         </div>
     </div>
@@ -216,7 +216,7 @@
         <div id="upload-modal" class="modal hidden">
             <div class="modal-content wide">
                 <div class="modal-header">
-                    <h2>Նոր փաստաթուղթ</h2>
+                    <h2 data-t="new_doc_title">New Document</h2>
                     <button id="close-modal-top" style="background:none; border:none; font-size:1.5rem;">×</button>
                 </div>
 
@@ -226,17 +226,17 @@
 
                 <div class="upload-actions">
                     <label class="camera-btn small">
-                        Նկարել
+                        <span data-t="capture_btn">Capture</span>
                         <input type="file" id="add-page-camera" accept="image/*" capture="camera" hidden>
                     </label>
                     <label class="camera-btn small secondary">
-                        Պատկերասրահ
+                        <span data-t="gallery_btn">Gallery</span>
                         <input type="file" id="add-page-gallery" accept="image/*" multiple hidden>
                     </label>
                 </div>
 
-                <button id="process-batch-btn" class="primary-btn" disabled>Պահպանել փաստաթուղթը</button>
-                <button id="close-modal" class="link-btn">Չեղարկել</button>
+                <button id="process-batch-btn" class="primary-btn" disabled data-t="save_doc">Save Document</button>
+                <button id="close-modal" class="link-btn" data-t="cancel">Cancel</button>
             </div>
         </div>
 
@@ -244,64 +244,98 @@
         <div id="detail-modal" class="modal hidden">
             <div class="modal-content wide">
                 <div class="modal-header">
-                    <h2 id="detail-title">Տվյալներ</h2>
+                    <h2 id="detail-title" data-t="detail_data">Data</h2>
                     <button id="close-detail">×</button>
                 </div>
+                
                 <div id="detail-fields" class="field-list"></div>
 
                 <div id="add-field-box" class="hidden">
-                    <input type="text" id="new-field-key" placeholder="Դաշտի անուն (օր. Անուն)">
-                    <input type="text" id="new-field-val" placeholder="Արժեքը">
-                    <button id="save-new-field" class="primary-btn">Պահպանել</button>
+                    <input type="text" id="new-field-key" data-t="field_name_label" placeholder="Field name...">
+                    <input type="text" id="new-field-val" data-t="field_val_label" placeholder="Value">
+                    <button id="save-new-field" class="primary-btn" data-t="save_changes">Save</button>
+                    <button id="cancel-new-field" class="link-btn" data-t="cancel">Cancel</button>
                 </div>
 
-                <button id="show-add-field" class="link-btn">+ Ավելացնել դաշտ ձեռքով</button>
-
-                <button id="copy-doc-data" class="link-btn"
-                    style="background: none; border: none; padding: 0; font-size: 0.75rem; color: var(--accent); width: auto; margin: 0.5rem 0; font-weight: 700;">
-                    Պատճենել տվյալները
-                </button>
-
-                <div class="actions" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 1.5rem;">
-                    <button id="save-doc-changes" class="primary-btn" style="flex: 1;">Պահպանել փոփոхությունները</button>
-                    <button id="detail-share-btn" class="primary-btn" style="flex:1; background: #0078d4;">🔗 Поделиться</button>
-                    <button id="download-pdf" class="secondary-btn" style="flex: 1;">Ներբեռնել PDF</button>
-                    <button id="delete-doc" class="danger-btn" style="flex: 1;">Ջնջել</button>
-                    <button id="share-pdf" class="hidden">Ուղարկել PDF</button> 
+                <div class="detail-secondary-actions" style="margin-top: 1rem; display: flex; gap: 15px;">
+                    <button id="show-add-field" class="link-btn" style="padding: 0; width: auto;" data-t="add_field_btn">+ Add field manually</button>
+                    <button id="copy-doc-data" class="link-btn" style="padding: 0; width: auto;" data-t="copy_data">Copy data</button>
                 </div>
+
+                <!-- Photo Preview Section -->
+                <div id="image-preview-container" style="margin-top: 1.5rem; text-align: center; cursor: pointer;">
                     <img id="detail-image" src="" alt="Document Scan"
-                        style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); cursor: zoom-in;"
-                        onclick="window.open(this.src)">
+                        style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;" data-t="click_full_view">Click for full screen view</p>
                 </div>
 
-                <div class="actions">
-                    <button id="save-doc-changes" class="primary-btn hidden"
-                        style="background-color: var(--success-color); margin-bottom: 1rem;">Պահպանել
-                        փոփոխությունները</button>
-                    <button id="download-pdf" class="primary-btn">Ներբեռնել PDF</button>
-                    <button id="share-pdf" class="primary-btn"
-                        style="background-color: var(--accent-color); color: white;">Ուղարկել PDF</button>
-                    <button id="delete-doc" class="danger-btn">Ջնջել</button>
+                <!-- Footer Actions -->
+                <div class="actions" style="display: flex; flex-direction: column; gap: 12px; margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                    <button id="save-doc-changes" class="primary-btn"><span data-t="save_changes">Պահպանել</span></button>
+                    <button id="open-share-choice" class="primary-btn" style="background: #0078d4;"><span data-t="share">Поделиться</span></button>
+                    <button id="open-download-choice" class="primary-btn" style="background: #0078d4;"><span data-t="download">Скачать</span></button>
+                    <button id="delete-doc" class="danger-btn"><span data-t="delete">Ջնջել</span></button>
                 </div>
             </div>
         </div>
+
+    <!-- Share Choice Modal -->
+    <div id="share-choice-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-t="share_options">Share Options</h2>
+                <button id="close-share-choice" style="background:none; border:none; font-size:1.5rem;">×</button>
+            </div>
+            <div class="vertical-actions">
+                <button id="share-opt-photo" class="primary-btn"><span data-t="opt_photo">Share Photo</span></button>
+                <button id="share-opt-pdf" class="primary-btn"><span data-t="opt_pdf">Share PDF</span></button>
+                <button id="share-opt-link" class="primary-btn" style="background: var(--accent);"><span data-t="opt_link">AmperID Link (Timed)</span></button>
+                <button id="cancel-share-choice" class="link-btn" data-t="cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Choice Modal -->
+    <div id="download-choice-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-t="download_options">Download Options</h2>
+                <button id="close-download-choice" style="background:none; border:none; font-size:1.5rem;">×</button>
+            </div>
+            <div class="vertical-actions">
+                <button id="download-opt-photo" class="primary-btn"><span data-t="opt_photo">Photo</span> (JPG)</button>
+                <button id="download-opt-pdf" class="primary-btn"><span data-t="opt_pdf">PDF Document</span></button>
+                <button id="cancel-download-choice" class="link-btn" data-t="cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Image Viewer Modal -->
+    <div id="full-image-viewer" class="modal hidden" style="background: rgba(0,0,0,0.95); z-index: 200000; padding: 0;">
+        <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
+            <button id="close-viewer" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 44px; height: 44px; border-radius: 50%; font-size: 24px; cursor: pointer;">×</button>
+        </div>
+        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+            <img id="viewer-img" src="" alt="Full Screen" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+        </div>
+    </div>
     </div>
 
     <!-- Delete Choice Modal - Moved out to be high-level -->
     <div id="delete-choice-modal" class="modal hidden" style="z-index: 100000;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Ջնջելու տարբերակներ</h2>
+                <h2 data-t="delete_options">Delete Options</h2>
                 <button id="close-delete-choice" style="background:none; border:none; font-size:1.5rem;">×</button>
             </div>
-            <p style="margin: 1rem 0; color: var(--text-secondary); font-size: 0.9rem;">
-                Ինչպե՞ս եք ցանկանում վարվել այս փաստաթղթի հետ:
+            <p style="margin: 1rem 0; color: var(--text-secondary); font-size: 0.9rem;" data-t="delete_description">
+                How would you like to handle this document?
             </p>
             <div class="vertical-actions">
                 <button id="remove-from-folder-btn" class="primary-btn"
-                    style="background-color: var(--accent);">Հեռացնել միայն թղթապանակից</button>
-                <button id="delete-completely-btn" class="danger-btn">Ջնջել ամբողջությամբ</button>
-                <button id="cancel-delete-btn" class="link-btn">Չեղարկել</button>
+                    style="background-color: var(--accent);" data-t="rm_from_folder">Remove from folder only</button>
+                <button id="delete-completely-btn" class="danger-btn" data-t="delete_completely">Delete completely</button>
+                <button id="cancel-delete-btn" class="link-btn" data-t="cancel">Cancel</button>
             </div>
         </div>
     </div>
@@ -310,19 +344,19 @@
     <div id="smart-suggest-modal" class="modal hidden" style="z-index: 100001;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>ԻԻ Առաջարկ ✨</h2>
+                <h2 data-t="ai_suggest">AI Suggestion</h2>
                 <button id="close-smart-suggest" style="background:none; border:none; font-size:1.5rem;">×</button>
             </div>
             <p style="margin: 1rem 0; font-weight: 600; color: var(--accent);">
-                ԻԻ-ն համարում է, որ այս փաստաթղթի համար լավագույն տեղն է՝ <span id="suggested-folder-name"
+                <span data-t="ai_suggest_desc">AI thinks the best place for this is:</span> <span id="suggested-folder-name"
                     style="color:var(--success-color); border-bottom: 2px solid;">...</span>
             </p>
-            <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.85rem;">
-                Ցանկանո՞ւմ եք անմիջապես տեղափոխել այնտեղ:
+            <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.85rem;" data-t="ai_suggest_confirm">
+                Would you like to move it there now?
             </p>
             <div class="vertical-actions">
-                <button id="confirm-smart-move-btn" class="primary-btn">Այո, տեղափոխել</button>
-                <button id="reject-smart-move-btn" class="link-btn">Ոչ, թողնել այստեղ</button>
+                <button id="confirm-smart-move-btn" class="primary-btn" data-t="yes_move">Yes, move it</button>
+                <button id="reject-smart-move-btn" class="link-btn" data-t="no_stay">No, stay here</button>
             </div>
         </div>
     </div>
@@ -333,45 +367,55 @@
     <div id="share-modal" class="modal hidden" style="z-index: 100000;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Поделиться документом</h2>
+                <h2 data-t="share_doc">Share AmperID Document</h2>
                 <button id="close-share-btn" style="background:none; border:none; font-size:1.5rem;">×</button>
             </div>
             
             <!-- Step 1: Time Selection -->
             <div id="share-step-time" class="share-step">
-                <p style="margin: 1rem 0; color: var(--text-secondary); font-size: 0.9rem;">
-                    Выберите, на какое время открыть доступ к этому документу:
+                <p style="margin: 1rem 0; color: var(--text-secondary); font-size: 0.9rem;" data-t="opt_link">
+                    Select the duration for access:
                 </p>
                 <div class="vertical-actions">
-                    <button class="time-btn primary-btn" data-time="5">5 минут</button>
-                    <button class="time-btn primary-btn" data-time="30">30 минут</button>
-                    <button class="time-btn primary-btn" data-time="60">1 час</button>
-                    <button class="time-btn primary-btn" data-time="120">2 часа</button>
-                    <button class="time-btn primary-btn" data-time="1440">24 часа</button>
-                    <button id="cancel-share-btn" class="link-btn">Отмена</button>
+                    <button class="time-btn primary-btn" data-time="5">5 <span data-t="min">min</span></button>
+                    <button class="time-btn primary-btn" data-time="30">30 <span data-t="min">min</span></button>
+                    <button class="time-btn primary-btn" data-time="60">1 <span data-t="hour">hour</span></button>
+                    <button class="time-btn primary-btn" data-time="120">2 <span data-t="hour">hours</span></button>
+                    <button class="time-btn primary-btn" data-time="1440">24 <span data-t="hour">hours</span></button>
+                    <button id="cancel-share-btn" class="link-btn" data-t="cancel">Cancel</button>
                 </div>
             </div>
 
             <!-- Step 2: Result -->
             <div id="share-step-result" class="share-step hidden">
                 <div class="share-result-container" style="text-align: center; padding: 1rem 0;">
-                    <p style="font-size: 0.85rem; margin-bottom: 1rem;">Покажите этот QR-код или отправьте ссылку:</p>
-                    <div id="share-qrcode" style="display: flex; justify-content: center; margin-bottom: 1.5rem;"></div>
+                    <p style="font-size: 0.85rem; margin-bottom: 1rem;" data-t="share_qr_desc">Show this QR code or send the link:</p>
+                    <div style="background: white; padding: 16px; border-radius: 20px; display: inline-block; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        <div id="share-qrcode"></div>
+                    </div>
                     
                     <div class="share-url-box" style="display: flex; gap: 8px; margin-bottom: 1.5rem;">
                         <input type="text" id="share-url" readonly style="flex: 1; margin-bottom: 0;">
-                        <button id="copy-share-url-btn" class="icon-btn" style="background: var(--bg-light); border: 1px solid var(--border);">📋</button>
+                        <button id="copy-share-url-btn" class="icon-btn" style="background: var(--bg-light); border: 1px solid var(--border);">🔗</button>
                     </div>
 
                     <div class="security-number-display" style="background: var(--accent-light); padding: 1.25rem; border-radius: 12px; border: 1px dashed var(--accent);">
-                        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); font-weight: 800;">Security Number</span>
+                        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); font-weight: 800;" data-t="security_num_label">Security Number</span>
                         <div id="share-security-num" style="font-size: 3rem; font-weight: 800; color: var(--accent); margin: 0.5rem 0;">--</div>
-                        <p style="font-size: 0.8rem; line-height: 1.4; color: var(--text-secondary);">
-                            Попросите человека выбрать это число из предложенных вариантов на странице документа.
+                        <p style="font-size: 0.8rem; line-height: 1.4; color: var(--text-secondary);" data-t="security_num_desc">
+                            Ask the recipient to select this number from the options on the document page.
                         </p>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Native Full Image Viewer -->
+    <div id="full-image-viewer" class="modal hidden" style="background: rgba(0,0,0,0.95); z-index: 1000000; padding: 0; align-items: center; justify-content: center;">
+        <button id="close-viewer" style="position: absolute; top: 30px; right: 30px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; z-index: 10;">×</button>
+        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px;">
+            <img id="viewer-img" src="" alt="Full View" style="max-width: 100%; max-height: 100%; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); object-fit: contain;">
         </div>
     </div>
 

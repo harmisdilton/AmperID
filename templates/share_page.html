@@ -1,150 +1,283 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hy">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AmperID - Secure Document Share</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AmperID - Secure Share</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --accent: #0078d4;
             --bg-light: #f3f2f1;
             --app-bg: #ffffff;
+            --card-bg: #ffffff;
             --text-primary: #323130;
             --text-secondary: #605e5c;
             --border: #edebe9;
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-light: #0a0a0a;
+                --app-bg: #111111;
+                --card-bg: #1e1e1e;
+                --text-primary: #ffffff;
+                --text-secondary: #a19f9d;
+                --border: #2d2d2d;
+            }
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
-            font-family: 'Segoe UI', 'Inter', sans-serif;
+            font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif;
             background-color: var(--bg-light);
             color: var(--text-primary);
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 1.5rem;
+            transition: background 0.3s;
         }
 
         .container {
-            background: var(--app-bg);
+            background: var(--card-bg);
             width: 100%;
-            max-width: 450px;
-            padding: 30px;
-            border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            max-width: 480px;
+            padding: 2.5rem 2rem;
+            border-radius: 28px;
+            box-shadow: var(--shadow-lg);
             text-align: center;
+            border: 1px solid var(--border);
+            animation: slideUp 0.5s cubic-bezier(0.1, 0.7, 0.1, 1);
         }
 
-        .logo { font-size: 2rem; margin-bottom: 2rem; }
-        .logo span { font-weight: 800; letter-spacing: -1px; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        h2 { font-size: 1.5rem; margin-bottom: 1rem; }
-        p { color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem; }
+        .hidden { display: none !important; }
+
+        .logo { font-size: 2.2rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .logo span { font-weight: 800; letter-spacing: -1.2px; color: var(--text-primary); }
+        .logo-icon { filter: drop-shadow(0 2px 4px rgba(0,120,212,0.2)); }
+
+        h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.8rem; color: var(--text-primary); }
+        p { color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.5; }
 
         .security-options {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             margin-bottom: 2rem;
         }
 
         .option-btn {
             background: var(--bg-light);
-            border: 2px solid transparent;
-            padding: 1.5rem;
-            border-radius: 16px;
-            font-size: 1.5rem;
+            border: 1px solid var(--border);
+            padding: 1.25rem 0.5rem;
+            border-radius: 18px;
+            font-size: 1.8rem;
             font-weight: 800;
             cursor: pointer;
-            transition: all 0.2s;
-            color: var(--text-primary);
-            text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: var(--accent);
         }
 
         .option-btn:hover {
+            transform: translateY(-4px);
             border-color: var(--accent);
-            background: rgba(0, 120, 212, 0.05);
+            box-shadow: 0 8px 20px rgba(0, 120, 212, 0.2);
+        }
+
+        .option-btn:active {
+            transform: scale(0.9);
+            background: var(--accent);
+            color: white;
         }
 
         .error-msg {
-            color: #d83b01;
-            background: #fdf3f0;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            display: none;
+            color: #d13438;
+            background: rgba(209, 52, 56, 0.1);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
         }
 
         /* Full Document View */
-        #content-section.hidden { display: none; }
-        
         #doc-image {
             max-width: 100%;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-top: 1rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            margin-top: 1.5rem;
+            cursor: zoom-in;
+        }
+
+        .field-list {
+            background: var(--bg-light);
+            border-radius: 20px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            text-align: left;
+            border: 1px solid var(--border);
         }
 
         .field-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
+            padding: 10px 0;
             border-bottom: 1px solid var(--border);
-            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
 
-        .field-label { color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; }
-        .field-value { font-weight: 700; color: var(--text-primary); font-size: 0.95rem; }
+        .field-row:last-child { border-bottom: none; }
 
-        .expired { color: #d83b01; font-weight: 700; }
+        .field-label { color: var(--text-secondary); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .field-value { font-weight: 700; color: var(--text-primary); font-size: 1rem; word-break: break-all; overflow-wrap: anywhere; }
+
+        .loader {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .footer-note { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+
+        /* Built-in Full Image Viewer */
+        #full-viewer {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #full-viewer:not(.hidden) { opacity: 1; pointer-events: auto; }
+        #full-viewer img { max-width: 95%; max-height: 95%; border-radius: 12px; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
+        #close-full-viewer {
+            position: absolute;
+            top: 20px; right: 20px;
+            width: 44px; height: 44px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">🚀 <span>AmperID</span></div>
+        <div class="logo"><span class="logo-icon">💠</span><span>AmperID</span></div>
+
+        <div id="loading-section">
+            <div class="loader"></div>
+            <p id="loading-text">Loading secure session...</p>
+        </div>
 
         <!-- Verification Section -->
-        <div id="verify-section">
-            <h2>Security Verification</h2>
-            <p>Чтобы просмотреть документ, выберите число, которое сообщил вам отправитель:</p>
-            <div id="error-box" class="error-msg">Неверное число. Попробуйте еще раз.</div>
-            <div class="security-options" id="options-grid">
-                <!-- Buttons will be injected here -->
-            </div>
+        <div id="verify-section" class="hidden">
+            <h2 id="v-title">Security Check</h2>
+            <p id="v-desc">To view this document, please select the security number provided by the sender.</p>
+            <div id="error-box" class="error-msg hidden">Invalid number. Please try again.</div>
+            <div class="security-options" id="options-grid"></div>
         </div>
 
         <!-- Content Section -->
         <div id="content-section" class="hidden">
-            <h2 id="doc-title">Document</h2>
-            <div id="doc-fields" style="margin: 1.5rem 0;"></div>
+            <h2 id="doc-title">Document Received</h2>
+            <div id="doc-fields" class="field-list"></div>
             <div id="image-container">
-                <img id="doc-image" src="" alt="Shared Document">
+                <img id="doc-image" src="" alt="Document View" style="cursor:zoom-in;">
             </div>
         </div>
 
         <!-- Error Section -->
         <div id="error-section" class="hidden">
-            <h2 id="error-title">Expired or Not Found</h2>
-            <p>Срок действия ссылки истек или документ был удален.</p>
+            <h2 id="error-title">Expired or Unavailable</h2>
+            <p id="error-desc">This link has reached its time limit or the document has been removed by the owner.</p>
+            <div style="font-size: 4rem; margin-top: 1rem;">⌛</div>
         </div>
+
+        <p class="footer-note">Securely delivered via AmperID Private Share</p>
+    </div>
+
+    <!-- Viewer Modal -->
+    <div id="full-viewer" class="hidden" onclick="this.classList.add('hidden')">
+        <div id="close-full-viewer">×</div>
+        <img id="full-viewer-img" src="" alt="Full View">
     </div>
 
     <script>
         const shareId = window.location.pathname.split('/').pop();
-        let options = [];
+        const lang = navigator.language || 'en';
+        
+        const uiText = {
+            hy: {
+                v_title: "Անվտանգության ստուգում",
+                v_desc: "Փաստաթուղթը տեսնելու համար ընտրեք ուղարկողի կողմից տրամադրված թիվը:",
+                invalid: "Սխալ թիվ: Փորձեք նորից:",
+                loading: "Բեռնվում է...",
+                expired_title: "Ժամկետն անցել է կամ հասանելի չէ",
+                expired_desc: "Այս հղման ժամկետն ավարտվել է կամ փաստաթուղթը հեռացվել է սեփականատիրոջ կողմից:",
+                doc_title: "Ստացված փաստաթուղթ"
+            },
+            ru: {
+                v_title: "Проверка безопасности",
+                v_desc: "Чтобы просмотреть документ, выберите число, которое сообщил вам отправитель.",
+                invalid: "Неверное число. Попробуйте еще раз.",
+                loading: "Загрузка...",
+                expired_title: "Ссылка истекла или недоступна",
+                expired_desc: "Срок действия этой ссылки истек или документ был удален владельцем.",
+                doc_title: "Полученный документ"
+            },
+            en: {
+                v_title: "Security Check",
+                v_desc: "To view this document, please select the security number provided by the sender.",
+                invalid: "Invalid number. Please try again.",
+                loading: "Loading secure session...",
+                expired_title: "Expired or Unavailable",
+                expired_desc: "This link has reached its time limit or the document has been removed by the owner.",
+                doc_title: "Document Received"
+            }
+        };
+
+        const t = uiText[lang.startsWith('ru') ? 'ru' : (lang.startsWith('hy') ? 'hy' : 'en')];
 
         async function init() {
+            document.getElementById('loading-text').innerText = t.loading;
             try {
                 const res = await fetch(`/api/share/init/${shareId}`);
-                if (!res.ok) throw new Error("Not found");
+                if (!res.ok) throw new Error("Unavailable");
                 
                 const data = await res.json();
+                document.getElementById('loading-section').classList.add('hidden');
+                document.getElementById('verify-section').classList.remove('hidden');
+                
+                // Set localized text
+                document.getElementById('v-title').innerText = t.v_title;
+                document.getElementById('v-desc').innerText = t.v_desc;
+                
                 renderOptions(data.options);
             } catch (err) {
-                showError("Expired or Not Found");
+                showError();
             }
         }
 
@@ -172,22 +305,24 @@
                     const data = await res.json();
                     showDocument(data);
                 } else {
-                    document.getElementById('error-box').style.display = 'block';
-                    setTimeout(() => document.getElementById('error-box').style.display = 'none', 3000);
+                    const errBox = document.getElementById('error-box');
+                    errBox.innerText = t.invalid;
+                    errBox.classList.remove('hidden');
+                    setTimeout(() => errBox.classList.add('hidden'), 3000);
                 }
             } catch (err) {
                 console.error(err);
+                showError();
             }
         }
 
         function showDocument(data) {
             document.getElementById('verify-section').classList.add('hidden');
             document.getElementById('content-section').classList.remove('hidden');
-            document.getElementById('doc-title').innerText = data.title;
+            document.getElementById('doc-title').innerText = t.doc_title;
             
             const fieldBox = document.getElementById('doc-fields');
             fieldBox.innerHTML = '';
-            // Display fields if any
             if (data.fields) {
                 for (const [key, val] of Object.entries(data.fields)) {
                     const row = document.createElement('div');
@@ -196,18 +331,25 @@
                     fieldBox.appendChild(row);
                 }
             }
-            
             if (data.image) {
-                document.getElementById('doc-image').src = data.image;
+                const imgEl = document.getElementById('doc-image');
+                imgEl.src = data.image;
+                imgEl.onclick = () => {
+                   const fv = document.getElementById('full-viewer');
+                   document.getElementById('full-viewer-img').src = data.image;
+                   fv.classList.remove('hidden');
+                };
             } else {
                 document.getElementById('image-container').classList.add('hidden');
             }
         }
 
-        function showError(msg) {
+        function showError() {
+            document.getElementById('loading-section').classList.add('hidden');
             document.getElementById('verify-section').classList.add('hidden');
             document.getElementById('error-section').classList.remove('hidden');
-            document.getElementById('error-title').innerText = msg;
+            document.getElementById('error-title').innerText = t.expired_title;
+            document.getElementById('error-desc').innerText = t.expired_desc;
         }
 
         init();
