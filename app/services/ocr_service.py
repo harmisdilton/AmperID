@@ -25,10 +25,11 @@ class OCRService:
 
         prompt = """
         Return ONE bounding box covering the MAIN document area: [ymin, xmin, ymax, xmax] (0–1000).
-        Also identify the document type, size, and decide if cropping is necessary.
+        Include ALL visible text (headers, footers, stamps, etc.).
         
         CRITICAL CROP RULE: 
-        If the document already occupies >95% of the image or looks well-framed/pre-cropped, set "should_crop" to false to avoid cutting edges.
+        - If the document already occupies >90% of the image or looks well-framed, set "should_crop" to false.
+        - For long narrow documents like RECEIPTS, be extra generous with vertical space.
         
         OUTPUT FORMAT (JSON ONLY):
         {
@@ -184,9 +185,9 @@ class OCRService:
                 right = (xmax / 1000) * w
                 bottom = (ymax / 1000) * h
                 
-                # Add a small padding (5%)
-                pad_w = (right - left) * 0.05
-                pad_h = (bottom - top) * 0.05
+                # Add a generous padding (12%) to ensure no text is cut off
+                pad_w = (right - left) * 0.12
+                pad_h = (bottom - top) * 0.12
                 
                 left = max(0, left - pad_w)
                 top = max(0, top - pad_h)
