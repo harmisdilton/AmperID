@@ -333,14 +333,19 @@ textarea:focus {
 }
 
 .doc-thumbnail {
-    width: 70px;
-    height: 90px;
-    object-fit: cover;
-    border-radius: 6px;
-    margin-bottom: 0.8rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    border: 1px solid rgba(0,0,0,0.05);
+    width: 60px;
+    height: 60px;
     background: var(--bg-light);
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.card-date {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    margin-top: auto;
+    opacity: 0.8;
 }
 
 .doc-card:hover {

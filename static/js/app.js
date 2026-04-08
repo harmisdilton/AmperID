@@ -808,6 +808,17 @@ function addLongPressListener(element, callback) {
 let renderTimer;
 let isRendering = false;
 
+function formatDateShort(isoString) {
+    if (!isoString) return "";
+    const d = new Date(isoString);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = String(d.getFullYear()).slice(-2);
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    return `${day}.${month}.${year} ${hh}:${mm}`;
+}
+
 async function renderDocuments() {
     // Debounce: Cancel any pending render and start a new one to prevent duplication
     clearTimeout(renderTimer);
@@ -906,19 +917,35 @@ async function renderFolderCard(folder) {
     const card = document.createElement('div');
     card.className = 'folder-card';
     const isNew = folder.id === newlyCreatedFolderId;
-    card.innerHTML = `<div class="folder-icon">📁</div>${isNew ? `<input type="text" value="${folder.name}" class="folder-title-input">` : `<div class="folder-name">${folder.name}</div>`}`;
+    const dateStr = formatDateShort(folder.created_at);
+    
+    // Set all HTML at ONCE to avoid destroying listeners later
+    card.innerHTML = `
+        <div class="folder-icon">📁</div>
+        ${isNew ? `<input type="text" value="${folder.name}" class="folder-title-input">` : `<div class="folder-name">${folder.name}</div>`}
+        <div class="card-date">${dateStr}</div>
+    `;
     
     if (isNew) {
         const input = card.querySelector('input');
-        setTimeout(() => { input.focus(); input.select(); }, 50);
+        setTimeout(() => { if (input) { input.focus(); input.select(); } }, 50);
+        let isSaving = false;
         const save = async () => {
+            if (isSaving) return;
+            isSaving = true;
             const val = input.value.trim() || t('no_name');
             await db.folders.update(folder.id, { name: val });
             newlyCreatedFolderId = null;
             renderDocuments();
         };
         input.onblur = save;
-        input.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); save(); } };
+        input.onkeydown = (e) => { 
+            if (e.key === 'Enter') { 
+                e.preventDefault(); 
+                input.onblur = null;
+                save(); 
+            } 
+        };
     } else {
         card.onclick = () => {
             if (!card.classList.contains('long-pressing')) {
@@ -946,9 +973,9 @@ function renderDocCard(doc) {
     const div = document.createElement('div');
     div.className = 'doc-card';
     const thumb = doc.thumbnail_data ? `<img src="${doc.thumbnail_data}" class="doc-thumbnail">` : `<div class="doc-thumbnail" style="display:flex;align-items:center;justify-content:center;font-size:2rem;">📄</div>`;
-    const dateLocale = currentLang === 'hy' ? 'hy-AM' : currentLang === 'ru' ? 'ru-RU' : 'en-US';
     const displayTitle = getDocTitle(doc);
-    div.innerHTML = `${thumb}<h3>${displayTitle}</h3><p style="font-size:0.7rem; color:gray;">${new Date(doc.created_at).toLocaleDateString(dateLocale)}</p>`;
+    const dateStr = formatDateShort(doc.created_at);
+    div.innerHTML = `${thumb}<h3>${displayTitle}</h3><div class="card-date">${dateStr}</div>`;
     
     div.onclick = () => { if (!div.classList.contains('long-pressing')) openDetail(doc.id); };
     
