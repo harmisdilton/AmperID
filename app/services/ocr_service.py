@@ -267,12 +267,65 @@ class OCRService:
         }}
         """
 
+    async def ai_ask_documents(self, prompt_text, doc_data_list, lang='en'):
+        """Analyzes all documents and answers a user question, returning relevant IDs."""
+        if not self.api_key: return {"answer": "API Key missing", "relevant_ids": []}
+        
+        # Prepare context
+        context = ""
+        for d in doc_data_list:
+            context += f"\n- ID:{d['id']} | Title:{d['title']} | Content:{json.dumps(d['fields'])}"
+
+        system_prompt = f"""
+        You are AmperID Assistant, a professional and helpful personal document manager.
+        Your task is to analyze the provided documents and answer the user question in a detailed, structured, and helpful way.
+        
+        OUTPUT RULES:
+        1. Answer strictly in {lang} language.
+        2. Provide detailed and helpful answers, just like a chat assistant.
+        3. Use Markdown formatting: Use bold for emphasis and bullet points for lists to make information easy to read.
+        4. Use emojis where appropriate to make the response friendly and clear.
+        5. Identify which document IDs were used to answer (return them in the relevant_ids array).
+        6. If no documents match, say so politely in {lang}.
+        
+        DOCUMENTS DATA:
+        {context}
+        
+        USER QUESTION: {prompt_text}
+        
+        OUTPUT FORMAT (JSON ONLY):
+        {{
+          "answer": "Your textual answer here",
+          "relevant_ids": [number, number, ...]
+        }}
+        """
+
         try:
-            result = await self.call_gemini_text_only(prompt)
-            return result if result else {"hy": "Սխալ:", "ru": "Ошибка:", "en": "Error:"}
+            result = await self.call_gemini_json(system_prompt)
+            return result if result else {"answer": "Failed to analyze.", "relevant_ids": []}
         except Exception as e:
-            print(f"DEBUG: Profile generation failed: {e}")
-            return {"hy": "Պրոֆիլի թարմացումը ձախողվեց:", "ru": "Не удалось обновить профиль:", "en": "Failed to update profile:"}
+            print(f"DEBUG: AI Search failed: {e}")
+            return {"answer": f"Error: {str(e)}", "relevant_ids": []}
+
+    async def call_gemini_json(self, prompt, retries=3):
+        """Helper to call Gemini for structured JSON results."""
+        for attempt in range(retries):
+            try:
+                response = await self.client.aio.models.generate_content(
+                    model=self.model,
+                    contents=prompt
+                )
+                ai_text = response.text.strip()
+                if "```json" in ai_text:
+                    ai_text = ai_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in ai_text:
+                    ai_text = ai_text.split("```")[1].split("```")[0].strip()
+                return json.loads(ai_text)
+            except Exception as e:
+                print(f"DEBUG: Gemini JSON call failed (Attempt {attempt+1}/{retries}): {e}")
+                if attempt < retries - 1: await asyncio.sleep((attempt+1)*3)
+                else: return None
+        return None
 
     async def call_gemini_text_only(self, prompt, retries=3):
         """Helper to call Gemini for text results that should be JSON parsed."""

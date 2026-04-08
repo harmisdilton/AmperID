@@ -93,3 +93,16 @@ async def generate_profile(data: List[dict]):
     """Receives a list of dicts (from all documents) and returns a synthesized bio."""
     bio = await ocr_service.generate_user_profile(data)
     return {"status": "success", "profile": bio}
+
+@router.post("/ai-search")
+async def ai_search(data: dict):
+    """
+    Receives: { "prompt": "...", "documents": [...], "lang": "..." }
+    Returns: { "answer": "...", "relevant_ids": [...] }
+    """
+    prompt = data.get("prompt")
+    docs = data.get("documents", [])
+    lang = data.get("lang", "en")
+    
+    result = await ocr_service.ai_ask_documents(prompt, docs, lang)
+    return JSONResponse(result)

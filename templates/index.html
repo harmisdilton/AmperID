@@ -75,6 +75,18 @@
         <div class="controls-container">
             <div class="search-container">
                 <input type="text" id="search-input" placeholder="Փնտրել փաստաթուղթ...">
+                <button id="ai-search-toggle" class="ai-toggle-btn" title="AI Assistant">AI</button>
+            </div>
+            
+            <!-- AI Response Panel -->
+            <div id="ai-response-container" class="ai-response-panel hidden">
+                <div class="ai-panel-header">
+                    <span class="ai-badge">AmperAI</span>
+                    <button id="ai-copy-btn" class="ai-copy-btn" title="Copy Response">📋</button>
+                </div>
+                <div class="ai-panel-content">
+                    <div id="ai-response-text" class="ai-text">...</div>
+                </div>
             </div>
 
             <nav class="view-tabs">
@@ -310,7 +322,8 @@
 
     </div>
 
-    <script src="/static/js/app.js?v=97"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/static/js/app.js?v=108"></script>
 </body>
 
 </html>

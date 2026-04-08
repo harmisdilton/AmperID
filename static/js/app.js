@@ -50,7 +50,9 @@ let searchTerm = "";
 let currentView = "all"; 
 let currentFolderId = null; 
 let newlyCreatedFolderId = null;
-let movingDocId = null; // ID of doc being moved
+let movingDocId = null; 
+let isAiSearchMode = false;
+let aiRelevantIds = null; // List of IDs returned by AI Search
 
 // Navigation
 let folderBackStack = [];
@@ -98,6 +100,9 @@ const translations = {
         ai_suggest_confirm: "Ցանկանո՞ւմ եք անմիջապես տեղափոխել այնտեղ?",
         yes_move: "Այո, տեղափոխել",
         no_stay: "Ոչ, թողնել այստեղ",
+        ai_search_placeholder: "Հարցրեք ИИ-ին ձեր փաստաթղթերի մասին...",
+        ai_thinking: "ԻԻ-ն մտածում է...",
+        ai_no_match: "Համապատասխան փաստաթուղթ չի գտնվել:",
         lock_screen_title: "Մուտքագրեք PIN կոդը",
         unlock_btn: "Բացել",
         security_title: "🔒 Անվտանգություն",
@@ -174,6 +179,9 @@ const translations = {
         ai_suggest_confirm: "Хотите переместить его туда?",
         yes_move: "Да, переместить",
         no_stay: "Нет, оставить здесь",
+        ai_search_placeholder: "Спросите ИИ о ваших документах...",
+        ai_thinking: "ИИ думает...",
+        ai_no_match: "Совпадений не найдено.",
         lock_screen_title: "Введите PIN-код",
         unlock_btn: "Открыть",
         security_title: "🔒 Безопасность",
@@ -250,6 +258,9 @@ const translations = {
         ai_suggest_confirm: "Would you like to move it there now?",
         yes_move: "Yes, move it",
         no_stay: "No, stay here",
+        ai_search_placeholder: "Ask AI about your documents...",
+        ai_thinking: "AI is thinking...",
+        ai_no_match: "No matching documents found.",
         lock_screen_title: "Enter PIN Code",
         unlock_btn: "Unlock",
         security_title: "🔒 Security",
@@ -589,10 +600,24 @@ function initContextUI() {
             await db.documents.update(movingDocId, { folder_id: currentFolderId });
             movingDocId = null;
             moveActionBar.classList.add('hidden');
-            alert(t('moved_msg'));
             renderDocuments();
         }
     };
+
+    // AI Copy Button
+    const aiCopyBtn = document.getElementById('ai-copy-btn');
+    if (aiCopyBtn) {
+        aiCopyBtn.onclick = () => {
+            const textToCopy = aiResponseText.innerText;
+            if (textToCopy && textToCopy !== '...') {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalText = aiCopyBtn.innerText;
+                    aiCopyBtn.innerText = '✅';
+                    setTimeout(() => aiCopyBtn.innerText = originalText, 2000);
+                });
+            }
+        };
+    }
 }
 
 function initTabs() {
@@ -624,8 +649,90 @@ function initTabs() {
 // --- Search ---
 searchInput.oninput = (e) => {
     searchTerm = e.target.value.toLowerCase().trim();
+    if (!isAiSearchMode) {
+        aiRelevantIds = null;
+        renderDocuments();
+    }
+};
+
+searchInput.onkeydown = async (e) => {
+    if (e.key === 'Enter' && isAiSearchMode && searchTerm) {
+        await executeAiSearch();
+    }
+};
+
+const aiToggleBtn = document.getElementById('ai-search-toggle');
+const aiResponseContainer = document.getElementById('ai-response-container');
+const aiResponseText = document.getElementById('ai-response-text');
+
+aiToggleBtn.onclick = () => {
+    isAiSearchMode = !isAiSearchMode;
+    aiToggleBtn.classList.toggle('active', isAiSearchMode);
+    document.querySelector('.search-container').classList.toggle('ai-active', isAiSearchMode);
+    
+    if (isAiSearchMode) {
+        searchInput.placeholder = t('ai_search_placeholder');
+        aiRelevantIds = null;
+    } else {
+        searchInput.placeholder = t('search_placeholder');
+        aiRelevantIds = null;
+        aiResponseContainer.classList.add('hidden');
+    }
     renderDocuments();
 };
+
+async function executeAiSearch() {
+    if (!searchTerm) return;
+    
+    aiResponseContainer.classList.remove('hidden');
+    aiResponseText.innerText = t('ai_thinking');
+    aiResponseText.classList.add('loading');
+    
+    try {
+        const allDocs = await db.documents.toArray();
+        let docsToAnalyze = allDocs;
+        
+        // Scope to current folder if one is open
+        if (currentFolderId !== null) {
+            docsToAnalyze = allDocs.filter(d => String(d.folder_id) === String(currentFolderId));
+        }
+
+        const compactDocs = docsToAnalyze.map(d => ({
+            id: d.id,
+            title: d.title,
+            fields: d.fields_json ? d.fields_json[currentLang]?.data || {} : {}
+        }));
+
+        console.log("DEBUG: Sending AI Search request...", {prompt: searchTerm, docCount: compactDocs.length});
+        const response = await fetch('/api/process/ai-search/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                prompt: searchTerm,
+                documents: compactDocs,
+                lang: currentLang
+            })
+        });
+
+        const result = await response.json();
+        
+        // Use Marked.js to parse the response if it exists, fallback to text
+        const rawAnswer = result.answer || t('ai_no_match');
+        if (typeof marked !== 'undefined' && marked.parse) {
+            aiResponseText.innerHTML = marked.parse(rawAnswer);
+        } else {
+            aiResponseText.innerText = rawAnswer;
+        }
+        
+        aiResponseText.classList.remove('loading');
+        aiRelevantIds = result.relevant_ids || [];
+        renderDocuments();
+        
+    } catch (err) {
+        aiResponseText.innerText = "Error: " + err.message;
+        aiResponseText.classList.remove('loading');
+    }
+}
 
 // --- Modals & User Menu ---
 logoTrigger.onclick = (e) => {
@@ -878,7 +985,17 @@ async function renderDocuments() {
             } else {
                 navBar.classList.add('hidden');
                 let docs = await db.documents.toArray();
-                if (searchTerm) {
+                
+                if (isAiSearchMode && aiRelevantIds !== null) {
+                    // Filter by AI suggested IDs (normalize types to Number)
+                    const normalizedIds = aiRelevantIds.map(Number);
+                    docs = docs.filter(d => normalizedIds.includes(Number(d.id)));
+                } else if (searchTerm) {
+                    // IF SEARCHING: Apply scope based on current folder
+                    if (currentFolderId !== null) {
+                        docs = docs.filter(d => String(d.folder_id) === String(currentFolderId));
+                    }
+
                     const term = searchTerm.toLowerCase();
                     docs = docs.filter(d => {
                         // 1. Search in current language title
@@ -921,7 +1038,7 @@ async function renderFolderCard(folder) {
     
     // Set all HTML at ONCE to avoid destroying listeners later
     card.innerHTML = `
-        <div class="folder-icon">📁</div>
+        <script src="/static/js/app.js?v=102"></script>
         ${isNew ? `<input type="text" value="${folder.name}" class="folder-title-input">` : `<div class="folder-name">${folder.name}</div>`}
         <div class="card-date">${dateStr}</div>
     `;
