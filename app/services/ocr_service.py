@@ -52,39 +52,38 @@ class OCRService:
         if folder_names:
             folders_context = f"\nAVAILABLE FOLDERS (suggest one if it matches): {', '.join(folder_names)}"
 
+        from datetime import datetime
+        now_str = datetime.now().strftime("%Y-%m-%d")
+
         prompt = f"""
         You are AmperID Vision Engine. Extract ALL visible data from this CROPPED document.
         Output everything in THREE languages: Armenian (hy), Russian (ru), and English (en).
         {folders_context}
         
+        TODAY'S DATE FOR REFERENCE: {now_str}
+        
         STRICT RULES:
         1. NEVER use underscores (_) in keys. Use natural spaces.
         2. Pick the suggested_folder name ENTIRELY from the AVAILABLE FOLDERS list if it matches.
         3. For 'translations', provide equivalent keys and values for each language.
+        4. Detect an "expiry_date" (ISO format: YYYY-MM-DD) if the document has a deadline or expiration. If not found, set to null.
+        5. If expiry_date is found, generate "expiry_alerts" for hy, ru, and en. 
+           Each language must have: "warning" (1 week left), "urgent" (1 day left), and "expired" (already past).
         
         OUTPUT FORMAT (JSON ONLY):
         {{
           "translations": {{
-            "hy": {{
-              "title": "Փաստաթղթի անվանում",
-              "data": {{
-                "Բանալի": "Արժեք"
-              }}
-            }},
-            "ru": {{
-              "title": "Название документа",
-              "data": {{
-                "Ключ": "Значение"
-              }}
-            }},
-            "en": {{
-              "title": "Document Title",
-              "data": {{
-                "Key": "Value"
-              }}
-            }}
+            "hy": {{ "title": "...", "data": {{...}} }},
+            "ru": {{ "title": "...", "data": {{...}} }},
+            "en": {{ "title": "...", "data": {{...}} }}
           }},
-          "suggested_folder": "Pick exact match from AVAILABLE FOLDERS list, otherwise null"
+          "expiry_date": "YYYY-MM-DD or null",
+          "expiry_alerts": {{
+            "hy": {{ "warning": "...", "urgent": "...", "expired": "..." }},
+            "ru": {{ "warning": "...", "urgent": "...", "expired": "..." }},
+            "en": {{ "warning": "...", "urgent": "...", "expired": "..." }}
+          }},
+          "suggested_folder": "..."
         }}
         """
         

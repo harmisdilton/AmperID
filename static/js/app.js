@@ -588,6 +588,32 @@ function searchInDocData(data, term) {
     return false;
 }
 
+/**
+ * Calculates the expiry status based on a given date string
+ * Returns 'ok', 'warning' (1 week), 'urgent' (1 day), or 'expired'
+ */
+function getExpiryStatus(expiryDateStr) {
+    if (!expiryDateStr) return 'ok';
+    try {
+        const expiry = new Date(expiryDateStr);
+        if (isNaN(expiry.getTime())) return 'ok';
+        
+        const now = new Date();
+        now.setHours(0,0,0,0);
+        expiry.setHours(0,0,0,0);
+
+        const diffTime = expiry - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) return 'expired';
+        if (diffDays <= 1) return 'urgent';
+        if (diffDays <= 7) return 'warning';
+        return 'ok';
+    } catch(e) {
+        return 'ok';
+    }
+}
+
 function initLangSwitcher() {
     const trigger = document.getElementById('lang-menu-trigger');
     const dropdown = document.getElementById('lang-dropdown');
@@ -1133,7 +1159,18 @@ function renderDocCard(doc) {
     const thumb = doc.thumbnail_data ? `<img src="${doc.thumbnail_data}" class="doc-thumbnail">` : `<div class="doc-thumbnail" style="display:flex;align-items:center;justify-content:center;font-size:2rem;">📄</div>`;
     const displayTitle = getDocTitle(doc);
     const dateStr = formatDateShort(doc.created_at);
-    div.innerHTML = `${thumb}<h3>${displayTitle}</h3><div class="card-date">${dateStr}</div>`;
+    
+    // AI Expiry Dot
+    let statusDot = '';
+    const expiryDate = doc.fields_json?.expiry_date;
+    if (expiryDate) {
+        const status = getExpiryStatus(expiryDate);
+        if (status !== 'ok') {
+            statusDot = `<div class="status-dot ${status}"></div>`;
+        }
+    }
+
+    div.innerHTML = `${statusDot}${thumb}<h3>${displayTitle}</h3><div class="card-date">${dateStr}</div>`;
     
     div.onclick = () => { if (!div.classList.contains('long-pressing')) openDetail(doc.id); };
     
@@ -1170,6 +1207,19 @@ async function openDetail(id) {
 
     detailTitle.innerHTML = `<input type="text" id="edit-doc-title" value="${displayTitle}" class="title-input">`;
     detailFields.innerHTML = '';
+    
+    // AI Expiry Banner
+    const expiryDate = fieldsRaw.expiry_date;
+    if (expiryDate) {
+        const status = getExpiryStatus(expiryDate);
+        if (status !== 'ok') {
+            const alerts = fieldsRaw.expiry_alerts?.[currentLang] || fieldsRaw.expiry_alerts?.['en'] || {};
+            const alertMsg = alerts[status] || "";
+            if (alertMsg) {
+                detailFields.innerHTML = `<div class="expiry-banner ${status}">${alertMsg}</div>`;
+            }
+        }
+    }
 
     for (const [k, v] of Object.entries(fields)) {
         if (k === 'առաջարկվող_անվանում' || k === 'suggested_folder') continue;
