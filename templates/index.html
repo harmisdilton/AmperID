@@ -47,26 +47,17 @@
                     <span class="logo-icon">💠</span>
                     <span class="brand-name">AmperID</span>
                 </div>
-                <!-- Theme Toggle & Lock -->
-                <div class="header-actions" style="margin-left: auto; margin-right: 15px;">
-                    <button id="manual-lock-btn" class="icon-btn" title="Lock App"></button>
-                    <div class="theme-switch-wrapper">
-                        <label class="theme-switch" for="checkbox">
-                            <input type="checkbox" id="checkbox" />
-                            <div class="slider round"></div>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Language Switcher -->
-                <div class="lang-switcher">
-                    <div class="lang-selected" id="lang-menu-trigger">
-                        <span id="current-lang-flag">🇦🇲</span>
-                    </div>
-                    <div id="lang-dropdown" class="lang-dropdown hidden">
-                        <div class="lang-option" data-lang="hy">🇦🇲 Հայերեն</div>
-                        <div class="lang-option" data-lang="ru">🇷🇺 Русский</div>
-                        <div class="lang-option" data-lang="en">🇺🇸 English</div>
+                <!-- Language Switcher only in header-actions -->
+                <div class="header-actions" style="margin-left: auto; display: flex; align-items: center; gap: 15px;">
+                    <div class="lang-switcher">
+                        <div class="lang-selected" id="lang-menu-trigger">
+                            <span id="current-lang-flag">🇦🇲</span>
+                        </div>
+                        <div id="lang-dropdown" class="lang-dropdown hidden">
+                            <div class="lang-option" data-lang="hy">🇦🇲 Հայերեն</div>
+                            <div class="lang-option" data-lang="ru">🇷🇺 Русский</div>
+                            <div class="lang-option" data-lang="en">🇺🇸 English</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -153,6 +144,24 @@
                     <button id="close-user-menu" style="background:none; border:none; font-size:1.5rem;">×</button>
                 </div>
                 <div class="menu-actions">
+                    <!-- Quick Actions -->
+                    <div class="menu-section" style="padding: 10px 0;">
+                        <div class="menu-row" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+                            <span data-t="dark_mode_label">Dark Mode</span>
+                            <div class="theme-switch-wrapper">
+                                <label class="theme-switch" for="checkbox">
+                                    <input type="checkbox" id="checkbox" />
+                                    <div class="slider round"></div>
+                                </label>
+                            </div>
+                        </div>
+                        <button id="manual-lock-btn" class="primary-btn" style="width: 100%; margin: 10px 0; background: var(--bg-light); color: var(--text-primary); border: 1px solid var(--border);">
+                            <span>🔒</span> <span data-t="lock_app_btn" style="margin-left:8px;">Lock Application</span>
+                        </button>
+                    </div>
+
+                    <div style="margin: 1rem 0; border-top: 1px solid var(--border); padding-top: 1rem;"></div>
+
                     <button id="show-profile-btn" class="primary-btn" style="margin-bottom: 0.75rem;" data-t="show_profile">
                         About Me (AI)
                     </button>

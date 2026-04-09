@@ -310,13 +310,14 @@ textarea:focus {
 .ai-response-panel {
     width: 100%;
     margin: 10px 0;
-    background: rgba(255, 255, 255, 0.7);
+    background: var(--bg-light);
     backdrop-filter: blur(15px);
-    border: 1px solid rgba(0, 120, 212, 0.3);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--border);
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    animation: slideDown 0.4s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+    box-shadow: var(--shadow-md);
+    animation: slideDown 0.4s cubic-bezier(0.1, 0.7, 0.1, 1);
 }
 
 .ai-panel-header {
@@ -692,24 +693,24 @@ textarea:focus {
 .fab {
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, #0078d4, #00bcf2);
+    background: var(--accent);
     color: white;
-    border: 3px solid #ffffff;
+    border: none;
     border-radius: 50%;
-    font-size: 2rem;
-    font-weight: 400;
-    box-shadow: 0 10px 25px rgba(0, 120, 212, 0.4);
+    font-size: 1.8rem;
+    font-weight: 300;
+    box-shadow: 0 8px 16px rgba(0, 120, 212, 0.2);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
 }
 
 #floating-add-btn {
-    width: 72px;
-    height: 72px;
-    font-size: 2.8rem;
+    width: 64px;
+    height: 64px;
+    font-size: 2.2rem;
 }
 
 #scroll-to-top.secondary {
@@ -729,8 +730,8 @@ textarea:focus {
 }
 
 .fab:hover {
-    box-shadow: 0 15px 40px rgba(0, 120, 212, 0.6);
-    transform: scale(1.1);
+    box-shadow: 0 12px 24px rgba(0, 120, 212, 0.3);
+    transform: translateY(-4px);
 }
 
 .fab.secondary:hover {
@@ -764,8 +765,13 @@ textarea:focus {
 }
 
 .camera-btn.secondary {
-    border-color: #323130;
-    color: #323130;
+    border-color: var(--border);
+    color: var(--text-primary);
+    background: var(--bg-light);
+}
+
+.camera-btn.secondary:hover {
+    background: var(--border);
 }
 
 .camera-btn.small {
@@ -1387,6 +1393,17 @@ textarea:focus {
 }
 
 /* --- Overhaul Correction: Centered Modals & Standard Lists --- */
+.menu-section {
+    padding: 10px 0;
+}
+
+.menu-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+}
+
 .vertical-actions {
     display: flex;
     flex-direction: column;

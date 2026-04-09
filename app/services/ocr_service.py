@@ -266,6 +266,11 @@ class OCRService:
           "en": "Biography text in English"
         }}
         """
+        try:
+            return await self.call_gemini_json(prompt)
+        except Exception as e:
+            print(f"DEBUG: Profile generation failed: {e}")
+            return None
 
     async def ai_ask_documents(self, prompt_text, doc_data_list, lang='en'):
         """Analyzes all documents and answers a user question, returning relevant IDs."""

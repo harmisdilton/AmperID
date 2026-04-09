@@ -108,13 +108,13 @@ const translations = {
         move_save: "Պահպանել այստեղ",
         move_cancel: "Չեղարկել",
         account_title: "Իմ հաշիվը",
-        show_profile: "Իմ մասին (AI)",
+        show_profile: "Իմ մասին (ԱԲ)",
         reset_data: "Ջնջել բոլոր տվյալները",
         about_me_title: "Իմ մասին",
         about_me_loading: "Պրոֆիլը բեռնվում է...",
         about_me_generating: "Պրոֆիլը գեներացվում է... (սպասեք 5-10 վրկ)",
         about_me_empty: "Ավելացրեք փաստաթղթեր՝ ձեր պրոֆիլը ստեղծելու համար:",
-        about_me_disclaimer: "* Այս տեքստը ստեղծվել է AI-ի կողմից՝ հիմնվելով ձեր բոլոր փաստաթղթերի վրա:",
+        about_me_disclaimer: "* Այս տեքստը ստեղծվել է ԱԲ-ի կողմից՝ հիմնվելով ձեր բոլոր փաստաթղթերի վրա:",
         close: "Փակել",
         new_doc_title: "Նոր փաստաթուղթ",
         capture_btn: "Նկարել",
@@ -136,13 +136,14 @@ const translations = {
         delete_description: "Ինչպե՞ս եք ցանկանում վարվել այս փաստաթղթի հետ?",
         rm_from_folder: "Հեռացնել միայն թղթապանակից",
         delete_completely: "Ջնջել ամբողջությամբ",
-        ai_suggest: "ԻԻ Առաջարկ",
-        ai_suggest_desc: "ԻԻ-ն համարում է, որ այս փաստաթղթի համար լավագույն տեղն է՝",
+        ai_suggest: "ԱԲ Առաջարկ",
+        ai_suggest_desc: "ԱԲ-ն համարում է, որ այս փաստաթղթի համար լավագույն տեղն է՝",
         ai_suggest_confirm: "Ցանկանո՞ւմ եք անմիջապես տեղափոխել այնտեղ?",
         yes_move: "Այո, տեղափոխել",
         no_stay: "Ոչ, թողնել այստեղ",
-        ai_search_placeholder: "Հարցրեք ИИ-ին ձեր փաստաթղթերի մասին...",
-        ai_thinking: "ԻԻ-ն մտածում է...",
+        ai_search_placeholder: "Հարցրեք ԱԲ-ին ձեր փաստաթղթերի մասին...",
+        ai_assistant: "ԱԲ Օգնական",
+        ai_thinking: "ԱԲ-ն մտածում է...",
         ai_no_match: "Համապատասխան փաստաթուղթ չի գտնվել:",
         lock_screen_title: "Մուտքագրեք PIN կոդը",
         unlock_btn: "Բացել",
@@ -158,7 +159,9 @@ const translations = {
         error_creating_link: "Հղումը ստեղծելիս սխալ տեղի ունեցավ:",
         reset_all_data: "Ջնջել բոլոր տվյալները",
         processing_pages: "Ուղարկում է {n} էջ...",
-        ai_processing: "ԻԻ-ն սկանավորում և կտրում է... (սպասեք 10-20 վրկ)",
+        ai_processing: "ԱԲ-ն սկանավորում և կտրում է... (սպասեք 10-20 վրկ)",
+        dark_mode_label: "Մութ ռեժիմ",
+        lock_app_btn: "Փակել հավելվածը",
         saving_db: "Պահպանում է բազայում...",
         confirm_reset: "Զգուշացում: Այս գործողությունը կջնջի ԲՈԼՈՐ փաստաթղթերը և թղթապանակները: Շարունակե՞լ:",
         confirm_delete_doc: "Ջնջե՞լ \"{t}\" փաստաթուղթը:",
@@ -168,7 +171,7 @@ const translations = {
         empty_folder: "Թղթապանակը դատարկ է",
         empty_all: "Փաստաթղթեր չկան",
         saved_msg: "Պահպանված է",
-        error_ai: "Սխալ՝ ԻԻ մշակման ընթացքում:",
+        error_ai: "Սխալ՝ ԱԲ մշակման ընթացքում:",
         error_conn: "Սխալ՝ կապի ընթացքում:",
         no_name: "Անուն չկա",
         doc_default_name: "Նոր փաստաթուղթ",
@@ -179,7 +182,7 @@ const translations = {
         move_info_prefix: "Տեղափոխել՝ ",
         privacy_policy_btn: "Գաղտնիության քաղաքականություն",
         privacy_policy_title: "Գաղտնիության քաղաքականություն",
-        privacy_policy_text: "AmperID-ն առաջնահերթություն է տալիս ձեր գաղտնիությանը: Բոլոր ձեր փաստաթղթերը և տվյալները պահպանվում են բացառապես ձեր սարքի վրա (Local Storage): Մենք չունենք սերվերային տվյալների բազա ձեր անձնական տվյալների համար: AI-ի մշակման ժամանակ պատկերները ուղարկվում են միայն վերլուծության համար և չեն պահպանվում սերվերում: Դուք ցանկացած պահի կարող եք ջնջել բոլոր տվյալները «Ջնջել բոլոր տվյալները» կոճակի միջոցով:",
+        privacy_policy_text: "AmperID-ն առաջնահերթություն է տալիս ձեր գաղտնիությանը: Բոլոր ձեր փաստաթղթերը և տվյալները պահպանվում են բացառապես ձեր սարքի վրա (Local Storage): Մենք չունենք սերվերային տվյալների բազա ձեր անձնական տվյալների համար: ԱԲ-ի մշակման ժամանակ պատկերները ուղարկվում են միայն վերլուծության համար և չեն պահպանվում սերվերում: Դուք ցանկացած պահի կարող եք ջնջել բոլոր տվյալները «Ջնջել բոլոր տվյալները» կոճակի միջոցով:",
         flag: "🇦🇲",
         share: "Կիսվել",
         download: "Ներբեռնել",
@@ -231,12 +234,13 @@ const translations = {
         delete_description: "Как вы хотите поступить с этим документом?",
         rm_from_folder: "Удалить только из папки",
         delete_completely: "Удалить полностью",
-        ai_suggest: "Предложение ИИ",
+        ai_suggest: "Предложение ԱԲ",
         ai_suggest_desc: "ИИ считает, что лучшее место для этого документа:",
         ai_suggest_confirm: "Хотите переместить его туда?",
         yes_move: "Да, переместить",
         no_stay: "Нет, оставить здесь",
         ai_search_placeholder: "Спросите ИИ о ваших документах...",
+        ai_assistant: "ИИ Помощник",
         ai_thinking: "ИИ думает...",
         ai_no_match: "Совпадений не найдено.",
         lock_screen_title: "Введите PIN-код",
@@ -253,7 +257,9 @@ const translations = {
         error_creating_link: "Ошибка при создании ссылки.",
         reset_all_data: "Сбросить все данные",
         processing_pages: "Отправка {n} стр...",
-        ai_processing: "ИИ сканирует... (жди 10-20 сек)",
+        ai_processing: "ИИ сканирует... (ждать 10-20с)",
+        dark_mode_label: "Тёмная тема",
+        lock_app_btn: "Заблокировать",
         saving_db: "Сохранение в базу...",
         confirm_reset: "Предупреждение: Это удалит ВСЕ документы и папки. Продолжить?",
         confirm_delete_doc: "Удалить документ \"{t}\"?",
@@ -334,6 +340,7 @@ const translations = {
         yes_move: "Yes, move it",
         no_stay: "No, stay here",
         ai_search_placeholder: "Ask AI about your documents...",
+        ai_assistant: "AI Assistant",
         ai_thinking: "AI is thinking...",
         ai_no_match: "No matching documents found.",
         lock_screen_title: "Enter PIN Code",
@@ -349,6 +356,8 @@ const translations = {
         reset_all_data: "Reset All Data",
         processing_pages: "Uploading {n} pages...",
         ai_processing: "AI scanning... (wait 10-20s)",
+        dark_mode_label: "Dark Mode",
+        lock_app_btn: "Lock Application",
         saving_db: "Saving to database...",
         confirm_reset: "Warning: This will delete ALL documents and folders. Continue?",
         confirm_delete_doc: "Delete document \"{t}\"?",
@@ -400,6 +409,10 @@ function initTheme() {
         body.classList.add('light-theme');
         if (themeCheckbox) themeCheckbox.checked = false;
     }
+
+    if (themeCheckbox) {
+        themeCheckbox.onchange = toggleTheme;
+    }
 }
 
 function toggleTheme() {
@@ -447,7 +460,16 @@ function initSecurity() {
     // Toggle manual lock button visibility in header
     const manualBtn = document.getElementById('manual-lock-btn');
     if (manualBtn) {
-        if (pin && pin.length === 4) manualBtn.classList.remove('hidden');
+        if (pin && pin.length === 4) {
+            manualBtn.classList.remove('hidden');
+            manualBtn.onclick = () => {
+                userMenuModal.classList.add('hidden');
+                document.getElementById('lock-screen').classList.remove('hidden');
+                document.getElementById('app').classList.add('app-hidden');
+                tempPin = "";
+                updatePinDots();
+            };
+        }
         else manualBtn.classList.add('hidden');
     }
 }
