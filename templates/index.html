@@ -428,9 +428,30 @@
         </div>
     </div>
 
+    <!-- Set PIN Modal -->
+    <div id="set-pin-modal" class="modal hidden" style="z-index: 100002;">
+        <div class="modal-content" style="max-width: 350px;">
+            <div class="modal-header">
+                <h2 data-t="set_pin">Set PIN Code</h2>
+                <button id="close-set-pin-modal" style="background:none; border:none; font-size:1.5rem;">×</button>
+            </div>
+            <div style="padding: 1.5rem 1.25rem; text-align: center;">
+                <p data-t="security_info" style="margin-bottom: 1.2rem; font-size: 0.95rem; color: var(--text-secondary); line-height: 1.4;">
+                    Set a 4-digit PIN to protect your personal documents.
+                </p>
+                <input type="password" id="new-pin-input" inputmode="numeric" maxlength="4" pattern="[0-9]*" 
+                       placeholder="••••" 
+                       style="width: 100%; text-align: center; font-size: 2.5rem; letter-spacing: 0.8rem; border: 2px solid var(--border); border-radius: 12px; padding: 0.75rem 0.5rem; background: var(--bg-light); color: var(--text-primary); transition: all 0.2s;">
+            </div>
+            <div class="actions" style="margin-top: 0.5rem;">
+                <button id="save-new-pin-btn" class="primary-btn" style="width: 100%;" data-t="save_msg">Save PIN</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="/static/js/app.js?v=109"></script>
+    <script src="/static/js/app.js?v=111"></script>
 </body>
 
 </html>

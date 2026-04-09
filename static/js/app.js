@@ -1597,14 +1597,34 @@ document.getElementById('pin-bio-trigger').onclick = () => tryBiometrics();
 
 // Security Settings
 document.getElementById('set-pin-btn').onclick = () => {
-    const newPin = prompt("Enter new 4-digit PIN:");
+    document.getElementById('set-pin-modal').classList.remove('hidden');
+    const input = document.getElementById('new-pin-input');
+    input.value = '';
+    input.focus();
+};
+
+document.getElementById('close-set-pin-modal').onclick = () => {
+    document.getElementById('set-pin-modal').classList.add('hidden');
+};
+
+document.getElementById('new-pin-input').oninput = (e) => {
+    // Only allow digits
+    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+};
+
+document.getElementById('save-new-pin-btn').onclick = async () => {
+    const input = document.getElementById('new-pin-input');
+    const newPin = input.value.trim();
+    
     if (newPin && /^\d{4}$/.test(newPin)) {
         localStorage.setItem('amp_pin', newPin);
         alert(t('pin_success'));
+        document.getElementById('set-pin-modal').classList.add('hidden');
         updateSecuritySettingsUI();
-        initSecurity(); // Immediately lock if needed, though usually they are already in the app
-    } else if (newPin !== null) {
-        alert("Invalid PIN. Please enter exactly 4 digits.");
+        initSecurity(); 
+    } else {
+        alert(t('error_ai')); // Fallback for invalid PIN message or use translation if exists
+        console.error("Invalid PIN format. Exactly 4 digits required.");
     }
 };
 
