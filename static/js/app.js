@@ -150,6 +150,7 @@ const translations = {
         security_title: "Անվտանգություն",
         security_info: "Սահմանեք 4-նիշանոց PIN կոդ՝ ձեր անձնական փաստաթղթերը պաշտպանելու համար:",
         set_pin: "Սահմանել PIN կոդ",
+        change_pin: "Փոխել PIN կոդը",
         remove_pin: "Հեռացնել PIN կոդը",
         enable_bio: "Միացնել Բիոմետրիան",
         pin_success: "PIN կոդը հաջողությամբ սահմանվեց",
@@ -248,6 +249,7 @@ const translations = {
         security_title: "Безопасность",
         security_info: "Установите 4-значный PIN-код для защиты ваших документов от посторонних.",
         set_pin: "Установить PIN-код",
+        change_pin: "Изменить PIN-код",
         remove_pin: "Удалить PIN-код",
         enable_bio: "Включить биометрию",
         pin_success: "PIN-код успешно установлен",
@@ -348,6 +350,7 @@ const translations = {
         security_title: "Security",
         security_info: "Set a 4-digit PIN to protect your personal documents from unauthorized access.",
         set_pin: "Set PIN Code",
+        change_pin: "Change PIN",
         remove_pin: "Remove PIN Code",
         enable_bio: "Enable Biometrics",
         pin_success: "PIN Code set successfully",
@@ -524,10 +527,13 @@ function updateSecuritySettingsUI() {
     info.innerText = t('security_info');
     
     if (pin) {
-        setBtn.innerText = t('set_pin') + " (Update)";
+        setBtn.innerText = t('change_pin');
         removeBtn.innerText = t('remove_pin');
         removeBtn.classList.remove('hidden');
         
+        const modalTitle = document.querySelector('#set-pin-modal h2');
+        if (modalTitle) modalTitle.innerText = t('change_pin');
+
         if (window.isSecureContext) {
             bioBtn.classList.remove('hidden');
             const isBio = localStorage.getItem('amp_bio_enabled') === 'true';
@@ -537,6 +543,8 @@ function updateSecuritySettingsUI() {
         setBtn.innerText = t('set_pin');
         removeBtn.classList.add('hidden');
         bioBtn.classList.add('hidden');
+        const modalTitle = document.querySelector('#set-pin-modal h2');
+        if (modalTitle) modalTitle.innerText = t('set_pin');
     }
 }
 
@@ -1915,6 +1923,7 @@ window.onload = () => {
     initSecurity();
     initLangSwitcher();
     updateStaticTranslations();
+    updateSecuritySettingsUI(); // Run AFTER static translations to ensure correct button text
     initTabs();
     initFolderNav();
     initContextUI();
