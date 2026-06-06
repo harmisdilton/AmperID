@@ -1,4 +1,4 @@
-python -m app.mainfastapi
+fastapi[all]
 uvicorn
 python-multipart
 Pillow
